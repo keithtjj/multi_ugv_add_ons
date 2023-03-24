@@ -1,9 +1,10 @@
 import rospy
 import rosbag
 from bagpy import bagreader
-from std_msgs.msg import Int32MultiArray, String, Bool
+from std_msgs.msg import Int32MultiArray, String, Bool, Header
 from geometry_msgs.msg import PointStamped, Point, PoseStamped, TwistStamped
 from sensor_msgs.msg import PointCloud2
+from nav_msgs.msg import Odometry
 import cv2
 import numpy as np
 
@@ -84,6 +85,7 @@ def vel_rebro(data):
 def tare_switch(tog):
     global tare_mode
     tare_mode = tog.data
+    pub_wp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=current_pose.position))
     return
 
 def save_poi(ps):
@@ -91,18 +93,9 @@ def save_poi(ps):
     rospy.loginfo('saved poi')
     return 
 
-def save_map(pc2):
-    bag.write('/explored_areas', pc2)
-    rospy.loginfo('saved map')
-    return 
-
-def get_map_from_bag(b):
-    t=0
-    for topic,msg,time in b.read_messages('/explored_areas'):
-        if time.secs > t:
-            latest = msg 
-            t = time.secs 
-    return latest    
+def get_pos(data):
+    global current_pose 
+    current_pose = data.pose.pose
 
 if __name__ == '__main__':
     # Initialize the ROS node
@@ -120,6 +113,7 @@ if __name__ == '__main__':
 
     rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
     rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
+    rospy.Subscriber('/state_estimation', Odometry, get_pos)
 
     rospy.Subscriber('/sensor_coverage_planner/Covered_Subspace_Indices', Int32MultiArray, save_covered)
     rospy.Subscriber('/sensor_coverage_planner/Exploring_Subspace_Indices', Int32MultiArray, save_exploring)
