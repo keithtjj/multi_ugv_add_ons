@@ -82,7 +82,7 @@ if __name__ == '__main__':
             rospy.loginfo('arrived at poi '+str(n))
             n+=1
         elif engage == False:
-            pub_gp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=poi_wp_list[0].point))
+            pub_gp.publish(poi_wp_list[0])
             rospy.loginfo('going to poi '+str(n))
 
         rospy.sleep(1)

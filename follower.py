@@ -23,6 +23,8 @@ def detector(data):
     global engage, arrival
     rawraw = bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
     raw = cv2.resize(cv2.cvtColor(rawraw, cv2.COLOR_BGR2RGB), (0,0), fx=2,fy=2)
+    #raw = sr.upsample(cv2.cvtColor(rawraw, cv2.COLOR_BGR2RGB))
+    #raw = cv2.imread('/home/intern/keith/man_standing.jpg')
     gray = cv2.cvtColor(raw, cv2.COLOR_BGR2GRAY)
 
     # detect people in the image
@@ -48,7 +50,7 @@ def detector(data):
 
             rospy.loginfo('identified')
 
-            ang_vel = 30 * (1-2*(x+w/2)/raw_x)
+            ang_vel = 30 * (1-2*x/raw_x)
             if h < 190:
                 lin_vel = 30 * (1-h/190)
             else: 

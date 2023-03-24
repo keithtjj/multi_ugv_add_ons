@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(multi_ugv_add_ons)
+project(add_ons)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
   rosbag
   std_msgs
   sensor_msgs
-  gazebo_msgs
 )
 
 ## System dependencies are found with CMake's conventions
