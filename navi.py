@@ -71,17 +71,19 @@ if __name__ == '__main__':
         rospy.Subscriber('/engaged', Bool, set_engage)
         rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
 
+        if engage:
+            continue
+
         if len(poi_wp_list) == 0:
             pub_gp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=Point(0,0,0)))
             rospy.loginfo('No more pois')
-            break
-        if points_in_range(current_pose.position, poi_wp_list[0].point, 0.5):
+        elif points_in_range(current_pose.position, poi_wp_list[0].point, 0.5):
             engage = True
             pub_arrival.publish(String(poi_wp_list[0].header.frame_id))
             poi_wp_list.remove(poi_wp_list[0])
             rospy.loginfo('arrived at poi '+str(n))
             n+=1
-        elif engage == False:
+        else:
             pub_gp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=poi_wp_list[0].point))
             rospy.loginfo('going to poi '+str(n))
 

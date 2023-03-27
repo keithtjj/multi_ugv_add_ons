@@ -18,7 +18,6 @@ engage = False
 
 pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=5)
 pub_engaged = rospy.Publisher('/engaged', Bool, queue_size=5)
-#pub_door = rospy.Publisher('/box_cmd_vel', Twist, queue_size=1)
 
 def del_model(model_name : str):
     rospy.wait_for_service('/gazebo/delete_model')
@@ -46,7 +45,6 @@ def detector(data):
     lower_b = np.array([0,100,100])
     upper_b = np.array([0,130,130])
     mask = cv2.inRange(raw, lower_b, upper_b)
-    cv2.imshow('mask', mask)
     cnts, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for c in cnts:
         cv2.drawContours(raw, [c], -1, (0, 255, 0), 3)
@@ -57,56 +55,47 @@ def detector(data):
     if not arrival:
         return
     
+    lin_vel = 0
+    ang_vel = 0
+    _, raw_x, _ = raw.shape
     if poi_type == 'door':
         for c in cnts:
             M = cv2.moments(c)
-            centerX = int(M["m10"] / M["m00"])
-            if raw.shape[1]/3 < centerX < raw.shape[1]*2/3:
-                #pub_door.publish(Twist(linear = Vector3(0.5,0,0), angular = Vector3(0,0,-0.5)))
+            centerX = int(M["m10"] / (M["m00"]+1))
+            if raw_x/3 < centerX < raw_x*2/3 and M["m00"] > 20000:
                 del_model('door')
                 pub_engaged.publish(Bool(False))
                 rospy.loginfo('destroyed')
-            elif centerX < raw.shape[1]/2:
-                pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
-                                            twist=(Twist(linear = Vector3(0,0,0), angular = Vector3(0,0,1)))))
-            elif centerX > raw.shape[1]/2:
-                pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
-                                            twist=(Twist(linear = Vector3(0,0,0), angular = Vector3(0,0,-1)))))
-
-    if len(boxes) == 1:
-        for (x, y, w, h) in boxes:
-            centerX = x+w/2
-            rospy.loginfo('identified')
-            if engage == True:
-                pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
-                                            twist=(Twist(linear = Vector3(0,0,0), angular = Vector3(0,0,0)))))
-            elif raw.shape[1]/3 < centerX < raw.shape[1]*2/3:
-                pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
-                                            twist=(Twist(linear = Vector3(0,0,0), angular = Vector3(0,0,0)))))
-                engage = True
-                rospy.loginfo('engage')
+                arrival = False
             else:
-                rospy.loginfo('aiming')
-                _, raw_x, _ = raw.shape
-                ang_vel = 30 * (1-2*(x+w/2)/raw_x)
-                if h < 190:
-                    lin_vel = 10 * (1-h/190)
-                else: 
-                    lin_vel = 0
-                pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
-                                            twist=(Twist(linear = Vector3(lin_vel,0,0), angular = Vector3(0,0,ang_vel)))))
-                
-    elif len(boxes)!=1 and engage==False:
-            pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
-                                                        twist=(Twist(linear = Vector3(0,0,0), angular = Vector3(0,0,10)))))
-            rospy.loginfo('not found')
+                ang_vel = 10 * (1-2*centerX/raw_x)
+        if len(cnts)==0:
+            ang_vel = 10
 
-    elif len(boxes)==0 and engage==True:
-        arrival = False
-        engage = False
-        rospy.loginfo('destroyed')
-        pub_engaged.publish(Bool(False))
+    elif poi_type == 'human':
+        if len(boxes) == 1:
+            for (x, y, w, h) in boxes:
+                centerX = x+w/2
+                rospy.loginfo('identified')
+                if raw.shape[1]/3 < centerX < raw.shape[1]*2/3:
+                    rospy.loginfo('engage')
+                    del_model('person_standing')
+                    pub_engaged.publish(Bool(False))
+                    rospy.loginfo('unalived')
+                    arrival = False
+                else:
+                    rospy.loginfo('aiming')
+                    ang_vel = 30 * (1-2*(x+w/2)/raw_x)
+                    if h < 190:
+                        lin_vel = 10 * (1-h/190)
+                    
+        else:
+            ang_vel = 10
+            rospy.loginfo('not found')
     
+    pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
+                                twist=(Twist(linear = Vector3(lin_vel,0,0), angular = Vector3(0,0,ang_vel)))))
+
 def arrived(target):
     global arrival, poi_type
     arrival = True

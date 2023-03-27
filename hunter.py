@@ -44,7 +44,9 @@ def callback(data):
     cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for c in cnts[0]:
         cv2.drawContours(raw, [c], -1, (0, 255, 0), 3)
-        if compare_pose(2):
+        area = cv2.contourArea(c)
+        rospy.loginfo(area)
+        if area > 35000 and compare_pose(2):
             pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='door'), pose=current_pose))
             poi_list.append(current_pose)
             rospy.loginfo('door')
