@@ -1,6 +1,5 @@
 import rospy
 import rosbag
-from bagpy import bagreader
 from std_msgs.msg import Int32MultiArray, String, Bool, Header
 from geometry_msgs.msg import PointStamped, Point, PoseStamped, TwistStamped
 from sensor_msgs.msg import PointCloud2
