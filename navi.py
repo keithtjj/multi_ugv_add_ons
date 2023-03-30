@@ -5,6 +5,8 @@ import rosbag
 from std_msgs.msg import Int8, Header, String, Bool
 from geometry_msgs.msg import PointStamped, Point, Pose, TwistStamped
 from nav_msgs.msg import Odometry
+
+from pathlib import Path
 import numpy as np
 
 pub_gp = rospy.Publisher('/goal_point', PointStamped, queue_size=5)
@@ -13,11 +15,13 @@ pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=1)
 pub_read_vg = rospy.Publisher('/read_file_dir', String, queue_size=5)
 pub_arrival = rospy.Publisher('/arrival', String, queue_size=5)
 
-vgh_name = 'map.vgh'
-folder = '/home/intern/test/store/'
-bag_name = 'data.bag'
+script_dir = Path( __file__ ).parent.absolute()
+ws = script_dir.parent.parent.parent
+folder = ws.joinpath('store')
+map_name = 'map.vgh'
+bag_name = 'spaces.bag'
 
-old_bag = rosbag.Bag(folder + bag_name)
+old_bag = rosbag.Bag(folder.joinpath(bag_name))
 tare_mode = True
 
 def get_poi_from_bag(b):
@@ -64,7 +68,7 @@ if __name__ == '__main__':
     engage = False
     current_pose = Pose()
     _, poi_wp_list = get_poi_from_bag(old_bag)
-    pub_read_vg.publish(String(folder + vgh_name))
+    pub_read_vg.publish(String(str(folder.joinpath(map_name))))
     n=1
     while not rospy.is_shutdown():
         rospy.Subscriber('/state_estimation', Odometry, get_pos)

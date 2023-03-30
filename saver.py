@@ -5,15 +5,19 @@ from std_msgs.msg import Int32MultiArray, String, Bool, Header
 from geometry_msgs.msg import PointStamped, Point, PoseStamped, TwistStamped
 from sensor_msgs.msg import PointCloud2
 from nav_msgs.msg import Odometry
+
+from pathlib import Path
 import cv2
 import numpy as np
 
-folder = '/home/intern/test/store/'
-bag_name = 'data.bag'
+script_dir = Path( __file__ ).parent.absolute()
+ws = script_dir.parent.parent.parent
+folder = ws.joinpath('store')
+bag_name = 'spaces.bag'
 map_name = 'map.vgh'
 
 try:
-    old_bag = rosbag.Bag(folder + bag_name)
+    old_bag = rosbag.Bag(folder.joinpath(bag_name))
 except: pass
 
 pub_covered = rospy.Publisher('/Combined_Covered_Indices', Int32MultiArray, queue_size=1)
@@ -28,7 +32,7 @@ tare_mode = True
 def save_covered(array):
     bag.write('/Combined_Covered_Indices', array)
     rospy.loginfo('saved c')
-    pub_save_vg.publish(String(folder + map_name))
+    pub_save_vg.publish(String(str(folder.joinpath(map_name))))
     rospy.loginfo('saved map')
     return 
 
@@ -109,7 +113,7 @@ if __name__ == '__main__':
     except:
         rospy.loginfo('L no bag')
         
-    bag = rosbag.Bag(folder + bag_name, 'w')
+    bag = rosbag.Bag(folder.joinpath(bag_name), 'w')
 
     rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
     rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
