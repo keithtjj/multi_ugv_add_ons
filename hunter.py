@@ -37,7 +37,6 @@ def callback(data):
     #rospy.loginfo('spotted ' + str(len(boxes)))
     
     #find doors
-    #(T, thresh) = cv2.threshold(gray, 5, 255, cv2.THRESH_BINARY_INV)
     lower_b = np.array([0,100,100])
     upper_b = np.array([0,130,130])
     mask = cv2.inRange(raw, lower_b, upper_b)
@@ -45,7 +44,7 @@ def callback(data):
     for c in cnts[0]:
         cv2.drawContours(raw, [c], -1, (0, 255, 0), 3)
         area = cv2.contourArea(c)
-        rospy.loginfo(area)
+        #rospy.loginfo(area)
         if area > 35000 and compare_pose(2):
             pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='door'), pose=current_pose))
             poi_list.append(current_pose)

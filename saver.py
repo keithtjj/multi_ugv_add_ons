@@ -47,22 +47,12 @@ def get_latest_covered_from_bag(b):
         for i in msg.data:
             if not (i in covered_array.data):
                 covered_array.data.append(int(i))
-        '''
-        if time.secs > t:
-            latest = msg 
-            t = time.secs
-        '''
     return covered_array
     
 def get_latest_exploring_from_bag(b):
     t=0
     exploring_array = Int32MultiArray()
     for topic,msg,time in b.read_messages('/Combined_Exploring_Indices'):
-        '''
-        for i in msg.data:
-            if not (i in exploring_array.data):
-                exploring_array.data.append(int(i))
-        '''
         if time.secs > t:
             latest = msg 
             t = time.secs
@@ -102,7 +92,7 @@ def get_pos(data):
 
 if __name__ == '__main__':
     # Initialize the ROS node
-    rospy.init_node('logger')
+    rospy.init_node('saver')
     rospy.sleep(1)
     try: 
         pub_covered.publish(get_latest_covered_from_bag(old_bag))

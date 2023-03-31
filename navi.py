@@ -3,7 +3,7 @@
 import rospy 
 import rosbag
 from std_msgs.msg import Int8, Header, String, Bool
-from geometry_msgs.msg import PointStamped, Point, Pose, TwistStamped
+from geometry_msgs.msg import PointStamped, Point, Pose, TwistStamped, PoseStamped
 from nav_msgs.msg import Odometry
 
 from pathlib import Path
@@ -23,17 +23,18 @@ bag_name = 'spaces.bag'
 
 old_bag = rosbag.Bag(folder.joinpath(bag_name))
 tare_mode = True
+poi_pose_list=[]
+poi_wp_list=[]
 
 def get_poi_from_bag(b):
+    global poi_pose_list, poi_wp_list
     t=0
-    poi_pose_list=[]
-    poi_wp_list=[]
     for topic,msg,time in b.read_messages('/poi'):
         if not (msg.pose in poi_pose_list):
             poi_pose_list.append(msg.pose)
             wp = PointStamped(header=msg.header, point = msg.pose.position)
             poi_wp_list.append(wp)
-    return poi_pose_list, poi_wp_list
+    return 
 
 def get_pos(data):
     global current_pose 
@@ -60,6 +61,14 @@ def set_engage(bool):
     global engage
     engage = False
 
+def save_poi(msg):
+    global poi_pose_list, poi_wp_list
+    if not (msg.pose in poi_pose_list):
+        poi_pose_list.append(msg.pose)
+        wp = PointStamped(header=msg.header, point = msg.pose.position)
+        poi_wp_list.append(wp)
+    return
+
 if __name__ == '__main__':
     rospy.init_node('navi')
     rospy.sleep(1)
@@ -74,7 +83,8 @@ if __name__ == '__main__':
         rospy.Subscriber('/state_estimation', Odometry, get_pos)
         rospy.Subscriber('/engaged', Bool, set_engage)
         rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
-
+        rospy.Subscriber("/poi", PoseStamped, save_poi)
+        
         if engage:
             continue
 
