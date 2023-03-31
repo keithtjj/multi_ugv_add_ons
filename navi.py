@@ -21,7 +21,6 @@ folder = ws.joinpath('store')
 map_name = 'map.vgh'
 bag_name = 'spaces.bag'
 
-old_bag = rosbag.Bag(folder.joinpath(bag_name))
 tare_mode = True
 poi_pose_list=[]
 poi_wp_list=[]
@@ -63,6 +62,7 @@ def set_engage(bool):
 
 def save_poi(msg):
     global poi_pose_list, poi_wp_list
+    rospy.loginfo("recieved poi")
     if not (msg.pose in poi_pose_list):
         poi_pose_list.append(msg.pose)
         wp = PointStamped(header=msg.header, point = msg.pose.position)
@@ -76,7 +76,11 @@ if __name__ == '__main__':
     global current_pose, engage
     engage = False
     current_pose = Pose()
-    _, poi_wp_list = get_poi_from_bag(old_bag)
+    try:
+        old_bag = rosbag.Bag(folder.joinpath(bag_name))
+        get_poi_from_bag(old_bag)
+    except:
+        pass
     pub_read_vg.publish(String(str(folder.joinpath(map_name))))
     n=1
     while not rospy.is_shutdown():
