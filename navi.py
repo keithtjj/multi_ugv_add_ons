@@ -83,11 +83,17 @@ if __name__ == '__main__':
         pass
     pub_read_vg.publish(String(str(folder.joinpath(map_name))))
     n=1
+
+
+
     while not rospy.is_shutdown():
         rospy.Subscriber('/state_estimation', Odometry, get_pos)
         rospy.Subscriber('/engaged', Bool, set_engage)
         rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
-        rospy.Subscriber("/poi_in", PoseStamped, save_poi)
+        for topic, msg_type in rospy.get_published_topics():
+            if (topic.endswith("poi")):
+                rospy.Subscriber(topic, PoseStamped, save_poi)
+        #rospy.Subscriber("/poi_in", PoseStamped, save_poi)
         
         if engage:
             continue
