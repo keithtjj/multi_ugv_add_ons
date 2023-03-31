@@ -87,14 +87,14 @@ if __name__ == '__main__':
         rospy.Subscriber('/state_estimation', Odometry, get_pos)
         rospy.Subscriber('/engaged', Bool, set_engage)
         rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
-        rospy.Subscriber("/poi", PoseStamped, save_poi)
+        rospy.Subscriber("/poi_in", PoseStamped, save_poi)
         
         if engage:
             continue
 
         if len(poi_wp_list) == 0:
             pub_gp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=Point(0,0,0)))
-            rospy.loginfo('No more pois')
+            rospy.loginfo('waiting for pois')
         elif points_in_range(current_pose.position, poi_wp_list[0].point, 0.5):
             engage = True
             pub_arrival.publish(String(poi_wp_list[0].header.frame_id))

@@ -12,7 +12,7 @@ import numpy as np
 # initialize the HOG descriptor/person detector
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
-pub_poi = rospy.Publisher('/poi', PoseStamped, queue_size=10)
+pub_poi = rospy.Publisher('/poi_out', PoseStamped, queue_size=10)
 bridge = CvBridge()
 global current_pose, poi_pose
 current_pose = Pose()
