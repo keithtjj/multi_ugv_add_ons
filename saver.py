@@ -94,6 +94,7 @@ if __name__ == '__main__':
     # Initialize the ROS node
     rospy.init_node('saver')
     rospy.sleep(1)
+    '''
     try: 
         pub_covered.publish(get_latest_covered_from_bag(old_bag))
         pub_exploring.publish(get_latest_exploring_from_bag(old_bag))
@@ -101,16 +102,16 @@ if __name__ == '__main__':
         rospy.loginfo('printed')
     except:
         rospy.loginfo('L no bag')
-        
+    '''    
     bag = rosbag.Bag(folder.joinpath(bag_name), 'w')
-
+    
     rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
     rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
 
     rospy.Subscriber('/sensor_coverage_planner/Covered_Subspace_Indices', Int32MultiArray, save_covered)
     rospy.Subscriber('/sensor_coverage_planner/Exploring_Subspace_Indices', Int32MultiArray, save_exploring)
-    rospy.Subscriber('/poi', PoseStamped, save_poi) 
+    rospy.Subscriber('/poi_out', PoseStamped, save_poi) 
     rospy.Subscriber('/toggle_tare', Bool, tare_switch) 
 
     rospy.spin()

@@ -90,9 +90,10 @@ if __name__ == '__main__':
         rospy.Subscriber('/state_estimation', Odometry, get_pos)
         rospy.Subscriber('/engaged', Bool, set_engage)
         rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
+        poi_subs = []
         for topic, msg_type in rospy.get_published_topics():
             if (topic.endswith("poi")):
-                rospy.Subscriber(topic, PoseStamped, save_poi)
+                poi_subs.append(rospy.Subscriber(topic, PoseStamped, save_poi))
         #rospy.Subscriber("/poi_in", PoseStamped, save_poi)
         
         if engage:
