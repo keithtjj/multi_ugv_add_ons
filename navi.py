@@ -94,6 +94,7 @@ if __name__ == '__main__':
         for topic, msg_type in rospy.get_published_topics():
             if (topic.endswith("poi")):
                 poi_subs.append(rospy.Subscriber(topic, PoseStamped, save_poi))
+        poi_subs
         #rospy.Subscriber("/poi_in", PoseStamped, save_poi)
         
         if engage:

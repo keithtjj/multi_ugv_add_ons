@@ -20,8 +20,8 @@ poi_list = []
 
 def callback(data):
     global poi_pose
-    rawraw = bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
-    raw = cv2.resize(cv2.cvtColor(rawraw, cv2.COLOR_BGR2RGB), (0,0), fx=2,fy=2)
+    rawraw = bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
+    raw = cv2.resize(rawraw, (0,0), fx=2,fy=2)
     gray = cv2.cvtColor(raw, cv2.COLOR_BGR2GRAY)
 
     # detect people in the image
