@@ -63,6 +63,8 @@ def set_engage(bool):
 def save_poi(msg):
     global poi_pose_list, poi_wp_list
     rospy.loginfo("recieved poi")
+    if msg.header.frame_id == 'test':
+        return
     if not (msg.pose in poi_pose_list):
         poi_pose_list.append(msg.pose)
         wp = PointStamped(header=msg.header, point = msg.pose.position)
@@ -99,6 +101,7 @@ if __name__ == '__main__':
             if (topic.endswith("poi")) and not (topic in poi_topics):
                 poi_subs.append(rospy.Subscriber(topic, PoseStamped, save_poi))
                 poi_topics.append(topic)
+                rospy.loginfo('Subbed to '+topic)
         poi_subs
               
         if engage:

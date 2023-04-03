@@ -72,10 +72,10 @@ def get_dist(a, b):
     return np.sqrt((a.x-b.x)**2 + (a.y-b.y)**2)
   
 if __name__ == '__main__':
-
     rospy.init_node('hunter')
     engage = False
-    rospy.sleep(2)
+    pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose))
+    rospy.sleep(1)
 
     rospy.Subscriber('/camera/image', Image, callback)
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
