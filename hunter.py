@@ -75,7 +75,6 @@ def get_dist(a, b):
 if __name__ == '__main__':
     rospy.init_node('hunter')
     engage = False
-    pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose))
     rospy.sleep(1)
 
     rospy.Subscriber('/camera/image', Image, callback)
