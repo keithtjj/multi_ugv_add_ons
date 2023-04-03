@@ -40,6 +40,11 @@ def save_exploring(array):
     rospy.loginfo('saved e')
     return 
 
+def save_poi(ps):
+    bag.write('/poi', ps)
+    rospy.loginfo('saved poi')
+    return 
+
 def get_latest_covered_from_bag(b):
     t=0
     covered_array = Int32MultiArray()
@@ -80,11 +85,6 @@ def tare_switch(tog):
     tare_mode = tog.data
     pub_wp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=current_pose.position))
     return
-
-def save_poi(ps):
-    bag.write('/poi', ps)
-    rospy.loginfo('saved poi')
-    return 
 
 def get_pos(data):
     global current_pose 
