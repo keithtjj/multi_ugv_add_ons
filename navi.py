@@ -76,27 +76,31 @@ if __name__ == '__main__':
     global current_pose, engage
     engage = False
     current_pose = Pose()
+    '''
     try:
         old_bag = rosbag.Bag(folder.joinpath(bag_name))
         get_poi_from_bag(old_bag)
     except:
         pass
     pub_read_vg.publish(String(str(folder.joinpath(map_name))))
+    '''
     n=1
-
-
+    poi_subs = []
+    poi_topics = []
+    rate = rospy.Rate(10)  
 
     while not rospy.is_shutdown():
         rospy.Subscriber('/state_estimation', Odometry, get_pos)
         rospy.Subscriber('/engaged', Bool, set_engage)
         rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
-        poi_subs = []
-        for topic, msg_type in rospy.get_published_topics():
-            if (topic.endswith("poi")):
+
+        topics = rospy.get_published_topics()
+        for topic, msg_type in topics:
+            if (topic.endswith("poi")) and not (topic in poi_topics):
                 poi_subs.append(rospy.Subscriber(topic, PoseStamped, save_poi))
+                poi_topics.append(topic)
         poi_subs
-        #rospy.Subscriber("/poi_in", PoseStamped, save_poi)
-        
+              
         if engage:
             continue
 
@@ -113,4 +117,4 @@ if __name__ == '__main__':
             pub_gp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=poi_wp_list[0].point))
             rospy.loginfo('going to poi '+str(n))
 
-        rospy.sleep(1)
+        rate.sleep()
