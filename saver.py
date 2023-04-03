@@ -27,7 +27,7 @@ pub_save_vg = rospy.Publisher('/save_file_dir', String, queue_size=5)
 pub_read_vg = rospy.Publisher('/read_file_dir', String, queue_size=5)
 
 tare_mode = True
-
+'''
 def save_covered(array):
     bag.write('/Combined_Covered_Indices', array)
     rospy.loginfo('saved c')
@@ -58,7 +58,7 @@ def get_latest_exploring_from_bag(b):
             t = time.secs
         exploring_array.data=latest.data    
     return exploring_array
-    
+'''    
 def wp_rebro(data):
     #rospy.loginfo("Received point at time %d", data.header.stamp.to_sec())
     global tare_mode
@@ -102,8 +102,8 @@ if __name__ == '__main__':
         rospy.loginfo('printed')
     except:
         rospy.loginfo('L no bag')
-    '''    
     bag = rosbag.Bag(folder.joinpath(bag_name), 'w')
+    '''
     
     rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
     rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
@@ -116,5 +116,5 @@ if __name__ == '__main__':
 
     rospy.spin()
 
-    bag.close()
-    rospy.loginfo('bag closed')
+    #bag.close()
+    #rospy.loginfo('bag closed')

@@ -24,7 +24,7 @@ bag_name = 'spaces.bag'
 tare_mode = True
 poi_pose_list=[]
 poi_wp_list=[]
-
+'''
 def get_poi_from_bag(b):
     global poi_pose_list, poi_wp_list
     t=0
@@ -39,7 +39,7 @@ def get_pos(data):
     global current_pose 
     current_pose = data.pose.pose
     #rospy.loginfo(current_pose)
-
+'''
 def vel_rebro(data):
     #rospy.loginfo("Received point at time %d", data.header.stamp.to_sec())
     global tare_mode
