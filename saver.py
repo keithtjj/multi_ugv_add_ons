@@ -23,8 +23,8 @@ pub_covered = rospy.Publisher('/Combined_Covered_Indices', Int32MultiArray, queu
 pub_exploring = rospy.Publisher('/Combined_Exploring_Indices', Int32MultiArray, queue_size=1)
 pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=1)
 pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=1)
-pub_save_vg = rospy.Publisher('/save_file_dir', String, queue_size=5)
-pub_read_vg = rospy.Publisher('/read_file_dir', String, queue_size=5)
+#pub_save_vg = rospy.Publisher('/save_file_dir', String, queue_size=5)
+#pub_read_vg = rospy.Publisher('/read_file_dir', String, queue_size=5)
 
 tare_mode = True
 '''
@@ -109,9 +109,9 @@ if __name__ == '__main__':
     rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
 
-    rospy.Subscriber('/sensor_coverage_planner/Covered_Subspace_Indices', Int32MultiArray, save_covered)
-    rospy.Subscriber('/sensor_coverage_planner/Exploring_Subspace_Indices', Int32MultiArray, save_exploring)
-    rospy.Subscriber('/poi_out', PoseStamped, save_poi) 
+    #rospy.Subscriber('/sensor_coverage_planner/Covered_Subspace_Indices', Int32MultiArray, save_covered)
+    #rospy.Subscriber('/sensor_coverage_planner/Exploring_Subspace_Indices', Int32MultiArray, save_exploring)
+    #rospy.Subscriber('/poi_out', PoseStamped, save_poi) 
     rospy.Subscriber('/toggle_tare', Bool, tare_switch) 
 
     rospy.spin()
