@@ -20,7 +20,7 @@ engage = False
 pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=5)
 pub_engaged = rospy.Publisher('/engaged', Bool, queue_size=5)
 
-model_list = [['door1', 43, -9]]
+model_list = [['door1', 43, -9], ['door2', 85, -4], ['door3', 56, 57], ['door4', 101, 56]]
 
 def get_pos(data):
     global current_pose 
