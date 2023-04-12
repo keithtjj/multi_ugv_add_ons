@@ -27,7 +27,7 @@ def detector(data):
 
     # detect people in the image
     # returns the bounding boxes for the detected objects
-    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(8,8))
+    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(8,8), hitThreshold=1.5)
     for (x, y, w, h) in boxes:
         # display the detected boxes in the colour picture
         cv2.rectangle(raw, (x, y), (x + w, y + h), (0, 255, 0), 2)
@@ -36,29 +36,26 @@ def detector(data):
 
     if len(boxes) == 1:
         global tare_mode
+        lin_vel = 0
+        ang_vel = 0
+
         if tare_mode == True:
             pub_tare_toggle.publish(Bool(False))
             tare_mode = False
             rospy.loginfo('tare broken')
-            pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
-                                        twist=(Twist(linear = Vector3(0,0,0), angular = Vector3(0,0,0)))))
             return
+        
         for (x, y, w, h) in boxes:
             _, raw_x, _ = raw.shape
-
             rospy.loginfo('identified')
-
             ang_vel = 30 * (1-2*(x+w/2)/raw_x)
             if h < 190:
                 lin_vel = 30 * (1-h/190)
             else: 
                 lin_vel = 0
-            pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
-                                        twist=(Twist(linear = Vector3(lin_vel,0,0), angular = Vector3(0,0,ang_vel)))))
             
-    else:
         pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
-                                        twist=(Twist(linear = Vector3(0,0,0), angular = Vector3(0,0,0)))))
+                                    twist=(Twist(linear = Vector3(lin_vel,0,0), angular = Vector3(0,0,ang_vel)))))        
 
 def arrived(bool):
     global arrival
@@ -67,7 +64,7 @@ def arrived(bool):
 if __name__ == '__main__':
     global arrival
     arrival = False
-    rospy.init_node('killer')
+    rospy.init_node('follower')
     rospy.Subscriber('/arrival', Bool, arrived)
     rospy.Subscriber('/camera/image', Image, detector)
 

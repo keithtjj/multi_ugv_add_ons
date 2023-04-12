@@ -4,6 +4,7 @@ import rospy
 from sensor_msgs.msg import Image 
 from std_msgs.msg import Int8, Header, Bool, String
 from geometry_msgs.msg import TwistStamped, Twist, Vector3
+from nav_msgs.msg import Odometry
 from gazebo_msgs.srv import DeleteModel
 from cv_bridge import CvBridge # Package to convert between ROS and OpenCV Images
 import cv2 
@@ -19,12 +20,29 @@ engage = False
 pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=5)
 pub_engaged = rospy.Publisher('/engaged', Bool, queue_size=5)
 
+model_list = [['door1', 43, -9]]
+
+def get_pos(data):
+    global current_pose 
+    current_pose = data.pose.pose
+
 def del_model(model_name : str):
     rospy.wait_for_service('/gazebo/delete_model')
     del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
     del_model_proxy(model_name)
     rospy.loginfo('destroyed' + model_name)
     return
+
+def del_model_sel():
+    d = 255
+    for mo in model_list:
+        dx = current_pose.position.x - mo[1]
+        dy = current_pose.position.y - mo[2]
+        dxy = dx**2 + dy*2
+        if dxy < d:
+            d = dxy
+            m = mo[0]
+    del_model(m)
 
 def detector(data):
     global engage, arrival
@@ -34,7 +52,7 @@ def detector(data):
 
     # detect people in the image
     # returns the bounding boxes for the detected objects
-    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(4,4))
+    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(4,4), hitThreshold=1.5)
     for (x, y, w, h) in boxes:
         # display the detected boxes in the colour picture
         cv2.rectangle(raw, (x, y), (x + w, y + h), (0, 255, 0), 2)
@@ -71,7 +89,7 @@ def detector(data):
         if len(cnts)==0:
             ang_vel = 10
 
-    elif poi_type == 'human':
+    elif poi_type == 'person':
         if len(boxes) == 1:
             for (x, y, w, h) in boxes:
                 centerX = x+w/2
@@ -106,6 +124,7 @@ if __name__ == '__main__':
     rospy.init_node('killer')
     rospy.Subscriber('/arrival', String, arrived)
     rospy.Subscriber('/camera/image', Image, detector)
+    rospy.Subscriber('/state_estimation', Odometry, get_pos)
 
     rospy.spin()
     cv2.destroyAllWindows()

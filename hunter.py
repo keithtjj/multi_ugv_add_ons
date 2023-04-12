@@ -26,13 +26,14 @@ def callback(data):
     gray = cv2.cvtColor(raw, cv2.COLOR_BGR2GRAY)
 
     # detect people in the image
-    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(8,8))
+    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(8,8), hitThreshold=1.5)
+    print(weights)
     for (x, y, w, h) in boxes:
         # display the detected boxes in the colour picture
         cv2.rectangle(raw, (x, y), (x+w, y+h), (0, 255, 0), 2)
         #d = -1.21*np.log(0.00138*h-0.159)
         if compare_pose(2):
-            poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='human'), pose=current_pose)
+            poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='person'), pose=current_pose)
             poi_list.append(current_pose)
             rospy.loginfo('man') 
     #rospy.loginfo('spotted ' + str(len(boxes)))

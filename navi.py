@@ -34,12 +34,12 @@ def get_poi_from_bag(b):
             wp = PointStamped(header=msg.header, point = msg.pose.position)
             poi_wp_list.append(wp)
     return 
-
+'''
 def get_pos(data):
     global current_pose 
     current_pose = data.pose.pose
     #rospy.loginfo(current_pose)
-'''
+
 def vel_rebro(data):
     #rospy.loginfo("Received point at time %d", data.header.stamp.to_sec())
     global tare_mode
@@ -95,15 +95,8 @@ if __name__ == '__main__':
         rospy.Subscriber('/state_estimation', Odometry, get_pos)
         rospy.Subscriber('/engaged', Bool, set_engage)
         rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
-
-        topics = rospy.get_published_topics()
-        for topic, msg_type in topics:
-            if (topic.endswith("poi")) and not (topic in poi_topics):
-                poi_subs.append(rospy.Subscriber(topic, PoseStamped, save_poi))
-                poi_topics.append(topic)
-                rospy.loginfo('Subbed to '+topic)
-        poi_subs
-              
+        rospy.Subscriber('/poi_in', PoseStamped, save_poi)
+        
         if engage:
             continue
 
