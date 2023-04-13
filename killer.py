@@ -20,7 +20,7 @@ engage = False
 pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=5)
 pub_engaged = rospy.Publisher('/engaged', Bool, queue_size=5)
 
-model_list = [['door1', 43, -9], ['door2', 85, -4], ['door3', 56, 57], ['door4', 101, 56]]
+model_list = [['door1', 43, -9], ['door2', 85, -4], ['door4', 56, 57], ['door3', 25, 25]]
 
 def get_pos(data):
     global current_pose 
@@ -34,14 +34,15 @@ def del_model(model_name : str):
     return
 
 def del_model_sel():
-    d = 255
+    d = 999999
     for mo in model_list:
         dx = current_pose.position.x - mo[1]
         dy = current_pose.position.y - mo[2]
-        dxy = dx**2 + dy*2
+        dxy = dx**2 + dy**2
         if dxy < d:
             d = dxy
             m = mo[0]
+    print(m)
     del_model(m)
 
 def detector(data):

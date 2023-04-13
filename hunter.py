@@ -27,7 +27,6 @@ def callback(data):
 
     # detect people in the image
     boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(8,8), hitThreshold=1.5)
-    print(weights)
     for (x, y, w, h) in boxes:
         # display the detected boxes in the colour picture
         cv2.rectangle(raw, (x, y), (x+w, y+h), (0, 255, 0), 2)
@@ -47,7 +46,7 @@ def callback(data):
         cv2.drawContours(raw, [c], -1, (0, 255, 0), 3)
         area = cv2.contourArea(c)
         #rospy.loginfo(area)
-        if area > 35000 and compare_pose(2):
+        if area > 30000 and compare_pose(2):
             poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='door'), pose=current_pose)
             poi_list.append(current_pose)
             rospy.loginfo('door')
