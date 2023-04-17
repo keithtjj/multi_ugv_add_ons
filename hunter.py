@@ -59,7 +59,7 @@ def compare_pose(r):
     for po in poi_list:
         dx = current_pose.position.x - po.position.x
         dy = current_pose.position.y - po.position.y
-        if abs(dx) < r or abs(dy) < r:
+        if dx**2 + dy **2 < r**2:
             return False
     rospy.loginfo(len(poi_list))
     return True

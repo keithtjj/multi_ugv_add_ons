@@ -51,7 +51,7 @@ def vel_rebro(data):
 def points_in_range(pt1, pt2, d):
     dx = pt1.x - pt2.x
     dy = pt1.y - pt2.y
-    if abs(dx) < d and abs(dy) < d:
+    if dx**2 + dy**2 < d**2:
         return True
     else:
         return False  
