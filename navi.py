@@ -64,7 +64,7 @@ def save_poi(msg):
     global poi_pose_list, poi_wp_list
     if msg.header.frame_id == 'test':
         return
-    rospy.loginfo("received poi")
+    #rospy.loginfo("received poi")
     if not (msg.pose in poi_pose_list):
         poi_pose_list.append(msg.pose)
         wp = PointStamped(header=msg.header, point = msg.pose.position)

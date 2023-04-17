@@ -34,7 +34,7 @@ def del_model(model_name : str):
     return
 
 def del_model_sel():
-    d = 999999
+    d = 255
     for mo in model_list:
         dx = current_pose.position.x - mo[1]
         dy = current_pose.position.y - mo[2]
@@ -42,7 +42,7 @@ def del_model_sel():
         if dxy < d:
             d = dxy
             m = mo[0]
-    print(m)
+    print('del' + m)
     del_model(m)
 
 def detector(data):
@@ -81,7 +81,7 @@ def detector(data):
             M = cv2.moments(c)
             centerX = int(M["m10"] / (M["m00"]+1))
             if raw_x/3 < centerX < raw_x*2/3 and M["m00"] > 20000:
-                del_model('door')
+                del_model_sel()
                 pub_engaged.publish(Bool(False))
                 rospy.loginfo('destroyed')
                 arrival = False

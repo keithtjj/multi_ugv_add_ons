@@ -46,7 +46,7 @@ def callback(data):
         cv2.drawContours(raw, [c], -1, (0, 255, 0), 3)
         area = cv2.contourArea(c)
         #rospy.loginfo(area)
-        if area > 30000 and compare_pose(2):
+        if area > 28000 and compare_pose(2):
             poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='door'), pose=current_pose)
             poi_list.append(current_pose)
             rospy.loginfo('door')
