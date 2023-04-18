@@ -18,7 +18,7 @@ hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 bridge = CvBridge()
 
-model_list = [['door1', 43, -9], ['door2', 85, -4], ['door4', 56, 57], ['door3', 25, 25]]
+model_list = [['door1', 43, -9], ['door2', 85, -4], ['door4', 56, 57], ['door3', 10, -2]]
 engage = False
 
 def get_pos(data):
