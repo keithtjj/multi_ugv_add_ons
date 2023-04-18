@@ -2,19 +2,20 @@
 
 import rospy 
 from sensor_msgs.msg import Image 
-from std_msgs.msg import Int8, Header
-from geometry_msgs.msg import PointStamped, Point, PoseStamped, Pose
+from std_msgs.msg import Header
+from geometry_msgs.msg import PointStamped, PoseStamped, Pose
 from nav_msgs.msg import Odometry
 from cv_bridge import CvBridge # Package to convert between ROS and OpenCV Images
 import cv2 
 import numpy as np
- 
+
+pub_poi = rospy.Publisher('/poi_out', PoseStamped, queue_size=10)
+
 # initialize the HOG descriptor/person detector
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
-pub_poi = rospy.Publisher('/poi_out', PoseStamped, queue_size=10)
 bridge = CvBridge()
-global current_pose, poi_pose
+
 current_pose = Pose()
 poi_list = []
 
@@ -32,7 +33,7 @@ def callback(data):
         cv2.rectangle(raw, (x, y), (x+w, y+h), (0, 255, 0), 2)
         #d = -1.21*np.log(0.00138*h-0.159)
         if compare_pose(2):
-            #poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='person'), pose=current_pose)
+            poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='person'), pose=current_pose)
             poi_list.append(current_pose)
             rospy.loginfo('man') 
     #rospy.loginfo('spotted ' + str(len(boxes)))

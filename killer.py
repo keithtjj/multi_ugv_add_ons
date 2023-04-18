@@ -2,25 +2,24 @@
 
 import rospy
 from sensor_msgs.msg import Image 
-from std_msgs.msg import Int8, Header, Bool, String
+from std_msgs.msg import Header, Bool, String
 from geometry_msgs.msg import TwistStamped, Twist, Vector3
 from nav_msgs.msg import Odometry
 from gazebo_msgs.srv import DeleteModel
 from cv_bridge import CvBridge # Package to convert between ROS and OpenCV Images
 import cv2 
 import numpy as np
- 
+
+pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=5)
+pub_engaged = rospy.Publisher('/engaged', Bool, queue_size=5) 
+
 # initialize the HOG descriptor/person detector
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 bridge = CvBridge()
 
-engage = False
-
-pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=5)
-pub_engaged = rospy.Publisher('/engaged', Bool, queue_size=5)
-
 model_list = [['door1', 43, -9], ['door2', 85, -4], ['door4', 56, 57], ['door3', 25, 25]]
+engage = False
 
 def get_pos(data):
     global current_pose 

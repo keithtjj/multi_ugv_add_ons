@@ -9,6 +9,13 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+pub_covered = rospy.Publisher('/Combined_Covered_Indices', Int32MultiArray, queue_size=1)
+pub_exploring = rospy.Publisher('/Combined_Exploring_Indices', Int32MultiArray, queue_size=1)
+pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=1)
+pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=1)
+
+tare_mode = True
+'''
 script_dir = Path( __file__ ).parent.absolute()
 ws = script_dir.parent.parent.parent
 folder = ws.joinpath('store')
@@ -19,15 +26,9 @@ try:
     old_bag = rosbag.Bag(folder.joinpath(bag_name))
 except: pass
 
-pub_covered = rospy.Publisher('/Combined_Covered_Indices', Int32MultiArray, queue_size=1)
-pub_exploring = rospy.Publisher('/Combined_Exploring_Indices', Int32MultiArray, queue_size=1)
-pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=1)
-pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=1)
 #pub_save_vg = rospy.Publisher('/save_file_dir', String, queue_size=5)
 #pub_read_vg = rospy.Publisher('/read_file_dir', String, queue_size=5)
 
-tare_mode = True
-'''
 def save_covered(array):
     bag.write('/Combined_Covered_Indices', array)
     rospy.loginfo('saved c')
@@ -63,21 +64,20 @@ def get_latest_exploring_from_bag(b):
             t = time.secs
         exploring_array.data=latest.data    
     return exploring_array
-'''    
-def wp_rebro(data):
-    #rospy.loginfo("Received point at time %d", data.header.stamp.to_sec())
-    global tare_mode
-    if tare_mode:
-        tare_wp = data
-        pub_wp.publish(tare_wp)
-    return
-
 def vel_rebro(data):
     #rospy.loginfo("Received point at time %d", data.header.stamp.to_sec())
     global tare_mode
     if tare_mode:
         aede_vel = data
         pub_vel.publish(aede_vel)
+    return
+    '''    
+def wp_rebro(data):
+    #rospy.loginfo("Received point at time %d", data.header.stamp.to_sec())
+    global tare_mode
+    if tare_mode:
+        tare_wp = data
+        pub_wp.publish(tare_wp)
     return
 
 def tare_switch(tog):
@@ -104,16 +104,13 @@ if __name__ == '__main__':
         rospy.loginfo('L no bag')
     bag = rosbag.Bag(folder.joinpath(bag_name), 'w')
     '''
-    
     rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
-    rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
+    #rospy.Subscriber("/aede_cmd_vel", TwistStamped, vel_rebro)
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
-
+    rospy.Subscriber('/toggle_tare', Bool, tare_switch) 
     #rospy.Subscriber('/sensor_coverage_planner/Covered_Subspace_Indices', Int32MultiArray, save_covered)
     #rospy.Subscriber('/sensor_coverage_planner/Exploring_Subspace_Indices', Int32MultiArray, save_exploring)
     #rospy.Subscriber('/poi_out', PoseStamped, save_poi) 
-    rospy.Subscriber('/toggle_tare', Bool, tare_switch) 
-
     rospy.spin()
 
     #bag.close()
