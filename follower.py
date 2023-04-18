@@ -37,8 +37,8 @@ def detector(data):
     lin_vel = 0
     ang_vel = 5
     if len(boxes) == 1:
+        global tare_mode
         if tare_mode == True:
-            global tare_mode
             pub_tare_toggle.publish(Bool(False))
             tare_mode = False
             rospy.loginfo('tare broken')
