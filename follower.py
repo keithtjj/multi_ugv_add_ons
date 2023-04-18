@@ -33,7 +33,8 @@ def detector(data):
     for (x, y, w, h) in boxes:
         # display the detected boxes in the colour picture
         cv2.rectangle(raw, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
+    if not arrival:
+        return
     lin_vel = 0
     ang_vel = 5
     if len(boxes) == 1:
