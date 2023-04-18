@@ -33,7 +33,7 @@ def save_poi(msg):
 
 def update_goal_status(msg):
     global n, engage, poi_wp_list
-    if msg.data == True:    
+    if msg.data == True and len(poi_wp_list) != 0:    
         engage = True
         pub_arrival.publish(String(poi_wp_list[0].header.frame_id))
         poi_wp_list.remove(poi_wp_list[0])
