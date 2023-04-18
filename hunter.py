@@ -80,7 +80,7 @@ if __name__ == '__main__':
     engage = False
     rospy.sleep(1)
 
-    rospy.Subscriber('/camera/image', Image, callback)
+    rospy.Subscriber('/camera/image', Image, callback, queue_size=1, buff_size=2**24)
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
     rospy.spin()
     

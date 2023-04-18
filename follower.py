@@ -33,8 +33,11 @@ def detector(data):
     for (x, y, w, h) in boxes:
         # display the detected boxes in the colour picture
         cv2.rectangle(raw, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    cv2.imshow("follower", raw)
+    cv2.waitKey(1)
     if not arrival:
         return
+    
     lin_vel = 0
     ang_vel = 5
     if len(boxes) == 1:
@@ -56,8 +59,6 @@ def detector(data):
             
     pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
                                 twist=(Twist(linear = Vector3(lin_vel,0,0), angular = Vector3(0,0,ang_vel)))))        
-    cv2.imshow("follower", raw)
-    cv2.waitKey(1)
     
 def arrived(msg):
     global arrival
@@ -66,6 +67,6 @@ def arrived(msg):
 if __name__ == '__main__':
     rospy.init_node('follower')
     rospy.Subscriber('/arrival', String, arrived)
-    rospy.Subscriber('/camera/image', Image, detector)
+    rospy.Subscriber('/camera/image', Image, detector, queue_size=1, buff_size=2**24)
     rospy.spin()
     cv2.destroyAllWindows()

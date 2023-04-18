@@ -123,7 +123,7 @@ if __name__ == '__main__':
     arrival = False
     rospy.init_node('killer')
     rospy.Subscriber('/arrival', String, arrived)
-    rospy.Subscriber('/camera/image', Image, detector)
+    rospy.Subscriber('/camera/image', Image, detector, queue_size=1, buff_size=2**24)
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
 
     rospy.spin()
