@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 import rospy 
-from sensor_msgs.msg import CompressedImage 
+from sensor_msgs.msg import Image 
 from std_msgs.msg import Header
 from geometry_msgs.msg import PointStamped, PoseStamped, Pose
 from nav_msgs.msg import Odometry
+from cv_bridge import CvBridge # Package to convert between ROS and OpenCV Images
 import cv2 
 import numpy as np
 
@@ -13,11 +14,7 @@ pub_poi = rospy.Publisher('/poi_out', PoseStamped, queue_size=10)
 # initialize the HOG descriptor/person detector
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
-
-sr = cv2.dnn_superres.DnnSuperResImpl_create()
-path = "ESPCN_x2.pb"
-sr.readModel(path)
-sr.setModel("espcn",2)
+bridge = CvBridge()
 
 current_pose = Pose()
 poi_list = []
@@ -25,15 +22,12 @@ poi_list = []
 def callback(data):
     global poi_pose
     poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose)
-    np_arr = np.fromstring(data.data, np.uint8)
-    raw = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-    #raw = cv2.resize(raw, (0,0), fx=2,fy=2)
-    raw = sr.upsample(raw)
+    rawraw = bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
+    raw = cv2.resize(rawraw, (0,0), fx=2,fy=2)
     gray = cv2.cvtColor(raw, cv2.COLOR_BGR2GRAY)
 
     # detect people in the image
-    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(8,8))
-    #print(weights)
+    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(8,8), hitThreshold=1.5)
     for (x, y, w, h) in boxes:
         # display the detected boxes in the colour picture
         cv2.rectangle(raw, (x, y), (x+w, y+h), (0, 255, 0), 2)
@@ -77,13 +71,16 @@ def get_pos(data):
     global current_pose 
     current_pose = data.pose.pose
     #rospy.loginfo(current_pose)
+
+def get_dist(a, b):
+    return np.sqrt((a.x-b.x)**2 + (a.y-b.y)**2)
   
 if __name__ == '__main__':
     rospy.init_node('hunter')
     engage = False
     rospy.sleep(1)
 
-    rospy.Subscriber('/camera/image/compressed', CompressedImage, callback, queue_size=1)
+    rospy.Subscriber('/camera/image', Image, callback, queue_size=1, buff_size=2**24)
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
     rospy.spin()
     
