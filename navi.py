@@ -22,13 +22,11 @@ n=1
 start = Joy()
 start.axes = [0,0,-1.0,0,1.0,1.0,0,0]
 start.buttons = [0,0,0,0,0,0,0,1,0,0,0]
-start.header.stamp = rospy.Time.now()
 start.header.frame_id = "teleop_panel"
 
 stop = Joy()
 stop.axes = [0,0,0,0,0,0,0,0]
 stop.buttons = [1,0,0,0,0,0,0,0,0,0,0]
-stop.header.stamp = rospy.Time.now()
 stop.header.frame_id = "teleop_panel"
 
 def set_engage(bool):
