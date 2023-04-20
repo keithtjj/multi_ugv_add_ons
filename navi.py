@@ -59,7 +59,7 @@ if __name__ == '__main__':
             rospy.loginfo('going home, waiting for new pois')
             waiting = True
 
-        else:
+        elif len(poi_wp_list)>0:
             pub_gp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=poi_wp_list[0].point))
             rospy.loginfo('going to poi '+str(n))
             waiting = False
