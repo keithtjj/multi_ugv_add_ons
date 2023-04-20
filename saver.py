@@ -93,7 +93,7 @@ def get_pos(data):
 if __name__ == '__main__':
     # Initialize the ROS node
     rospy.init_node('saver')
-    rospy.sleep(1)
+    rospy.sleep(5)
     '''
     try: 
         pub_covered.publish(get_latest_covered_from_bag(old_bag))

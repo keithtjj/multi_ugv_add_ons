@@ -3,11 +3,13 @@
 import rospy 
 import rosbag
 from std_msgs.msg import Header, String, Bool
+from sensor_msgs.msg import Joy
 from geometry_msgs.msg import PointStamped, Point, PoseStamped
 
 pub_gp = rospy.Publisher('/goal_point', PointStamped, queue_size=5)
 pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=5)
 pub_arrival = rospy.Publisher('/arrival', String, queue_size=5)
+pub_joy = rospy.Publisher('/joy', Joy, queue_size=5)
 
 poi_focus = 'door' #available poi types are: door, person
 
@@ -16,6 +18,18 @@ poi_wp_list=[]
 engage = False
 waiting = True
 n=1
+
+start = Joy()
+start.axes = [0,0,-1.0,0,1.0,1.0,0,0]
+start.buttons = [0,0,0,0,0,0,0,1,0,0,0]
+start.header.stamp = rospy.Time.now()
+start.header.frame_id = "teleop_panel"
+
+stop = Joy()
+stop.axes = [0,0,0,0,0,0,0,0]
+stop.buttons = [1,0,0,0,0,0,0,0,0,0,0]
+stop.header.stamp = rospy.Time.now()
+stop.header.frame_id = "teleop_panel"
 
 def set_engage(bool):
     global engage
@@ -33,9 +47,11 @@ def save_poi(msg):
         rospy.loginfo("added new poi")
 
 def update_goal_status(msg):
-    global n, engage, poi_wp_list
+    global n, engage, poi_wp_list, stop
     if msg.data == True and len(poi_wp_list) != 0 and not engage:    
         engage = True
+        stop.header.stamp = rospy.Time.now()
+        pub_joy.publish(stop)
         pub_arrival.publish(String(poi_wp_list[0].header.frame_id))
         poi_wp_list.remove(poi_wp_list[0])
         rospy.loginfo('arrived at poi '+str(n))
@@ -53,6 +69,9 @@ if __name__ == '__main__':
         
         if engage:
             continue
+        else:
+            start.header.stamp = rospy.Time.now()
+            pub_joy.publish(start)
 
         if len(poi_wp_list) == 0 and not waiting:
             pub_gp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=Point(0,0,0)))
