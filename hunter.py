@@ -27,7 +27,7 @@ def callback(data):
     gray = cv2.cvtColor(raw, cv2.COLOR_BGR2GRAY)
 
     # detect people in the image
-    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(8,8), hitThreshold=1.5)
+    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(8,8), hitThreshold=1.2)
     for (x, y, w, h) in boxes:
         # display the detected boxes in the colour picture
         cv2.rectangle(raw, (x, y), (x+w, y+h), (0, 255, 0), 2)

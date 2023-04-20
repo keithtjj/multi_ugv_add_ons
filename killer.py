@@ -52,7 +52,7 @@ def detector(data):
 
     # detect people in the image
     # returns the bounding boxes for the detected objects
-    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(4,4), hitThreshold=1.5)
+    boxes, weights = hog.detectMultiScale(gray, padding=(8, 8), winStride=(4,4), hitThreshold=1.2)
     for (x, y, w, h) in boxes:
         # display the detected boxes in the colour picture
         cv2.rectangle(raw, (x, y), (x + w, y + h), (0, 255, 0), 2)

@@ -14,6 +14,7 @@ poi_focus = 'door' #available poi types are: door, person
 poi_pose_list=[]
 poi_wp_list=[]
 engage = False
+waiting = True
 n=1
 
 def set_engage(bool):
@@ -44,7 +45,7 @@ if __name__ == '__main__':
     rospy.init_node('navi')
     rospy.sleep(1)
     rate = rospy.Rate(10)  
-
+    rospy.loginfo('ready, waiting for pois')
     while not rospy.is_shutdown():
         rospy.Subscriber('/engaged', Bool, set_engage)
         rospy.Subscriber('/poi_in', PoseStamped, save_poi)
@@ -53,12 +54,14 @@ if __name__ == '__main__':
         if engage:
             continue
 
-        if len(poi_wp_list) == 0:
+        if len(poi_wp_list) == 0 and not waiting:
             pub_gp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=Point(0,0,0)))
-            rospy.loginfo('waiting for pois')
+            rospy.loginfo('going home, waiting for new pois')
+            waiting = True
 
         else:
             pub_gp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=poi_wp_list[0].point))
             rospy.loginfo('going to poi '+str(n))
+            waiting = False
 
         rate.sleep()
