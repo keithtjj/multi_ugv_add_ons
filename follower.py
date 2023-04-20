@@ -62,7 +62,10 @@ def detector(data):
     
 def arrived(msg):
     global arrival
-    arrival = True
+    if msg.data == 'person':
+        arrival = True
+    else:
+        arrival = False
 
 if __name__ == '__main__':
     rospy.init_node('follower')

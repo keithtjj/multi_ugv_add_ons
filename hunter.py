@@ -47,7 +47,7 @@ def callback(data):
         cv2.drawContours(raw, [c], -1, (0, 255, 0), 3)
         area = cv2.contourArea(c)
         #rospy.loginfo(area)
-        if area > 30000 and compare_pose(4.5):
+        if area > 30000 and compare_pose(6):
             poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='door'), pose=current_pose)
             poi_list.append(current_pose)
             rospy.loginfo('door')
@@ -71,9 +71,6 @@ def get_pos(data):
     global current_pose 
     current_pose = data.pose.pose
     #rospy.loginfo(current_pose)
-
-def get_dist(a, b):
-    return np.sqrt((a.x-b.x)**2 + (a.y-b.y)**2)
   
 if __name__ == '__main__':
     rospy.init_node('hunter')
