@@ -5,6 +5,7 @@ import rosbag
 from std_msgs.msg import Header, String, Bool
 from sensor_msgs.msg import Joy
 from geometry_msgs.msg import PointStamped, Point, PoseStamped
+from gazebo_msgs.srv import DeleteModel
 from pathlib import Path
 import cv2
 
@@ -33,7 +34,15 @@ stop.header.frame_id = "teleop_panel"
 
 script_dir = Path( __file__ ).parent.absolute()
 start_path = str(script_dir.joinpath('start.png'))
-start = cv2.imread(start_path)
+start_screen = cv2.imread(start_path)
+
+def del_model(model):
+    model_name = model.data
+    rospy.wait_for_service('/gazebo/delete_model')
+    del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
+    del_model_proxy(model_name)
+    rospy.loginfo('destroyed' + model_name)
+    return
 
 def set_engage(bool):
     global engage
@@ -65,7 +74,7 @@ if __name__ == '__main__':
     rospy.init_node('navi')
     rate = rospy.Rate(10)
     while(True):
-        cv2.imshow('waiting...', start)
+        cv2.imshow('waiting...', start_screen)
         k = cv2.waitKey(0)
         print(k)
         if k == 27:
@@ -76,7 +85,8 @@ if __name__ == '__main__':
         rospy.Subscriber('/engaged', Bool, set_engage)
         rospy.Subscriber('/poi_in', PoseStamped, save_poi)
         rospy.Subscriber('/far_reach_goal_status', Bool, update_goal_status)
-        
+        rospy.Subscriber('/del_model', String, del_model)
+
         if engage:
             continue
         else:

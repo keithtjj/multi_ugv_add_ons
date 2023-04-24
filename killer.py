@@ -25,6 +25,21 @@ def get_pos(data):
     global current_pose 
     current_pose = data.pose.pose
 
+def del_model_sel(m):
+    d = 2**8
+    model_list = []
+    if m == 'door':
+        model_list = door_list
+    for mo in model_list:
+        dx = current_pose.position.x - mo[1]
+        dy = current_pose.position.y - mo[2]
+        dxy = dx**2 + dy**2
+        if dxy < d:
+            d = dxy
+            m = mo[0]
+    print('del' + m)
+    pub_kill.publish(String(m))
+
 def detector(data):
     global engage, arrival
     rawraw = bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
@@ -60,7 +75,7 @@ def detector(data):
             M = cv2.moments(c)
             centerX = int(M["m10"] / (M["m00"]+1))
             if raw_x/3 < centerX < raw_x*2/3 and M["m00"] > 20000:
-                pub_kill.publish(String('door'))
+                del_model_sel('door')
                 pub_engaged.publish(Bool(False))
                 rospy.loginfo('destroyed')
                 arrival = False
@@ -76,7 +91,7 @@ def detector(data):
                 rospy.loginfo('identified')
                 if raw.shape[1]/3 < centerX < raw.shape[1]*2/3:
                     rospy.loginfo('engage')
-                    pub_kill.publish(String('person'))
+                    del_model_sel('person')
                     pub_engaged.publish(Bool(False))
                     rospy.loginfo('unalived')
                     arrival = False
