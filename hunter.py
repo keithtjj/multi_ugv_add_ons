@@ -16,12 +16,13 @@ hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 bridge = CvBridge()
 
+engage = False
 current_pose = Pose()
 poi_list = []
 
 def callback(data):
     global poi_pose
-    poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose)
+    #poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose)
     rawraw = bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
     raw = cv2.resize(rawraw, (0,0), fx=2,fy=2)
     gray = cv2.cvtColor(raw, cv2.COLOR_BGR2GRAY)
@@ -33,7 +34,7 @@ def callback(data):
         cv2.rectangle(raw, (x, y), (x+w, y+h), (0, 255, 0), 2)
         #d = -1.21*np.log(0.00138*h-0.159)
         if compare_pose(2):
-            poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='person'), pose=current_pose)
+            pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='person'), pose=current_pose))
             poi_list.append(current_pose)
             rospy.loginfo('man') 
     #rospy.loginfo('spotted ' + str(len(boxes)))
@@ -48,10 +49,10 @@ def callback(data):
         area = cv2.contourArea(c)
         #rospy.loginfo(area)
         if area > 30000 and compare_pose(6):
-            poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='door'), pose=current_pose)
+            pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='door'), pose=current_pose))
             poi_list.append(current_pose)
             rospy.loginfo('door')
-    pub_poi.publish(poi)
+    #pub_poi.publish(poi)
     cv2.imshow("hunter", raw)
     cv2.waitKey(1)
 
@@ -74,11 +75,7 @@ def get_pos(data):
   
 if __name__ == '__main__':
     rospy.init_node('hunter')
-    engage = False
-    rospy.sleep(1)
-
     rospy.Subscriber('/camera/image', Image, callback, queue_size=1, buff_size=2**24)
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
     rospy.spin()
-    
     cv2.destroyAllWindows()

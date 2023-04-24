@@ -5,6 +5,8 @@ import rosbag
 from std_msgs.msg import Header, String, Bool
 from sensor_msgs.msg import Joy
 from geometry_msgs.msg import PointStamped, Point, PoseStamped
+from pathlib import Path
+import cv2
 
 pub_gp = rospy.Publisher('/goal_point', PointStamped, queue_size=5)
 pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=5)
@@ -28,6 +30,10 @@ stop = Joy()
 stop.axes = [0,0,0,0,0,0,0,0]
 stop.buttons = [1,0,0,0,0,0,0,0,0,0,0]
 stop.header.frame_id = "teleop_panel"
+
+script_dir = Path( __file__ ).parent.absolute()
+start_path = str(script_dir.joinpath('start.png'))
+start = cv2.imread(start_path)
 
 def set_engage(bool):
     global engage
@@ -57,8 +63,14 @@ def update_goal_status(msg):
 
 if __name__ == '__main__':
     rospy.init_node('navi')
-    rospy.sleep(1)
-    rate = rospy.Rate(10)  
+    rate = rospy.Rate(10)
+    while(True):
+        cv2.imshow('waiting...', start)
+        k = cv2.waitKey(0)
+        print(k)
+        if k == 27:
+            cv2.destroyWindow('waiting...')
+            break  
     rospy.loginfo('ready, waiting for pois')
     while not rospy.is_shutdown():
         rospy.Subscriber('/engaged', Bool, set_engage)

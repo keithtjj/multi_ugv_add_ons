@@ -5,13 +5,13 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Header, Bool, String
 from geometry_msgs.msg import TwistStamped, Twist, Vector3
 from nav_msgs.msg import Odometry
-from gazebo_msgs.srv import DeleteModel
 from cv_bridge import CvBridge # Package to convert between ROS and OpenCV Images
 import cv2 
 import numpy as np
 
 pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=5)
-pub_engaged = rospy.Publisher('/engaged', Bool, queue_size=5) 
+pub_engaged = rospy.Publisher('/engaged', Bool, queue_size=5)
+pub_kill = rospy.Publisher('/del_model', String, queue_size=5)
 
 # initialize the HOG descriptor/person detector
 hog = cv2.HOGDescriptor()
@@ -24,25 +24,6 @@ engage = False
 def get_pos(data):
     global current_pose 
     current_pose = data.pose.pose
-
-def del_model(model_name : str):
-    rospy.wait_for_service('/gazebo/delete_model')
-    del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
-    del_model_proxy(model_name)
-    rospy.loginfo('destroyed' + model_name)
-    return
-
-def del_model_sel():
-    d = 255
-    for mo in model_list:
-        dx = current_pose.position.x - mo[1]
-        dy = current_pose.position.y - mo[2]
-        dxy = dx**2 + dy**2
-        if dxy < d:
-            d = dxy
-            m = mo[0]
-    print('del' + m)
-    del_model(m)
 
 def detector(data):
     global engage, arrival
@@ -65,7 +46,6 @@ def detector(data):
     cnts, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for c in cnts:
         cv2.drawContours(raw, [c], -1, (0, 255, 0), 3)
-
     cv2.imshow("killer", raw)
     cv2.waitKey(1)
     
@@ -80,7 +60,7 @@ def detector(data):
             M = cv2.moments(c)
             centerX = int(M["m10"] / (M["m00"]+1))
             if raw_x/3 < centerX < raw_x*2/3 and M["m00"] > 20000:
-                del_model_sel()
+                pub_kill.publish(String('door'))
                 pub_engaged.publish(Bool(False))
                 rospy.loginfo('destroyed')
                 arrival = False
@@ -96,7 +76,7 @@ def detector(data):
                 rospy.loginfo('identified')
                 if raw.shape[1]/3 < centerX < raw.shape[1]*2/3:
                     rospy.loginfo('engage')
-                    del_model('person_standing')
+                    pub_kill.publish(String('person'))
                     pub_engaged.publish(Bool(False))
                     rospy.loginfo('unalived')
                     arrival = False
@@ -125,6 +105,5 @@ if __name__ == '__main__':
     rospy.Subscriber('/arrival', String, arrived)
     rospy.Subscriber('/camera/image', Image, detector, queue_size=1, buff_size=2**24)
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
-
     rospy.spin()
     cv2.destroyAllWindows()
