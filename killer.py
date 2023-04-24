@@ -11,7 +11,7 @@ import numpy as np
 
 pub_vel = rospy.Publisher('/cmd_vel', TwistStamped, queue_size=5)
 pub_engaged = rospy.Publisher('/engaged', Bool, queue_size=5)
-pub_kill = rospy.Publisher('/del_model', String, queue_size=5)
+pub_kill = rospy.Publisher('/del_model_out', String, queue_size=5)
 
 # initialize the HOG descriptor/person detector
 hog = cv2.HOGDescriptor()
