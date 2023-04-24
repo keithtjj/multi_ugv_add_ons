@@ -22,7 +22,7 @@ poi_list = []
 
 def callback(data):
     global poi_pose
-    #poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose)
+    pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose))
     rawraw = bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
     raw = cv2.resize(rawraw, (0,0), fx=2,fy=2)
     gray = cv2.cvtColor(raw, cv2.COLOR_BGR2GRAY)
@@ -32,12 +32,10 @@ def callback(data):
     for (x, y, w, h) in boxes:
         # display the detected boxes in the colour picture
         cv2.rectangle(raw, (x, y), (x+w, y+h), (0, 255, 0), 2)
-        #d = -1.21*np.log(0.00138*h-0.159)
         if compare_pose(2):
             pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='person'), pose=current_pose))
             poi_list.append(current_pose)
             rospy.loginfo('man') 
-    #rospy.loginfo('spotted ' + str(len(boxes)))
     
     #find doors
     lower_b = np.array([0,100,100])
@@ -52,7 +50,6 @@ def callback(data):
             pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='door'), pose=current_pose))
             poi_list.append(current_pose)
             rospy.loginfo('door')
-    #pub_poi.publish(poi)
     cv2.imshow("hunter", raw)
     cv2.waitKey(1)
 

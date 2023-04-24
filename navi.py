@@ -14,7 +14,7 @@ pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=5)
 pub_arrival = rospy.Publisher('/arrival', String, queue_size=5)
 pub_joy = rospy.Publisher('/joy', Joy, queue_size=5)
 
-poi_focus = 'door' #available poi types are: door, person
+poi_focus = 'person' #available poi types are: door, person
 
 poi_pose_list=[]
 poi_wp_list=[]
@@ -28,8 +28,8 @@ start.buttons = [0,0,0,0,0,0,0,1,0,0,0]
 start.header.frame_id = "teleop_panel"
 
 stop = Joy()
-stop.axes = [0,0,0,0,0,0,0,0]
-stop.buttons = [1,0,0,0,0,0,0,0,0,0,0]
+stop.axes = [0,1,0,0,0,0,0,0]
+stop.buttons = [0,0,0,0,0,0,0,1,0,0,0]
 stop.header.frame_id = "teleop_panel"
 
 script_dir = Path( __file__ ).parent.absolute()
@@ -38,6 +38,8 @@ start_screen = cv2.imread(start_path)
 
 def del_model(model):
     model_name = model.data
+    if model_name == 'test':
+        return
     rospy.wait_for_service('/gazebo/delete_model')
     del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
     del_model_proxy(model_name)

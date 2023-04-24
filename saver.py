@@ -21,6 +21,8 @@ start_screen = cv2.imread(start_path)
 
 def del_model(model):
     model_name = model.data
+    if model_name == 'test':
+        return
     rospy.wait_for_service('/gazebo/delete_model')
     del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
     del_model_proxy(model_name)

@@ -18,7 +18,7 @@ hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 bridge = CvBridge()
 
-model_list = [['door1', 43, -9], ['door2', 85, -4], ['door4', 56, 57], ['door3', 10, -2]]
+door_list = [['door1', 43, -9], ['door2', 85, -4], ['door4', 56, 57], ['door3', 10, -2]]
 engage = False
 
 def get_pos(data):
@@ -45,6 +45,7 @@ def detector(data):
     rawraw = bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
     raw = cv2.resize(rawraw, (0,0), fx=2,fy=2)
     gray = cv2.cvtColor(raw, cv2.COLOR_BGR2GRAY)
+    pub_kill.publish('test')
 
     # detect people in the image
     # returns the bounding boxes for the detected objects
@@ -54,7 +55,6 @@ def detector(data):
         cv2.rectangle(raw, (x, y), (x + w, y + h), (0, 255, 0), 2)
     
     #find doors
-    #(T, thresh) = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
     lower_b = np.array([0,100,100])
     upper_b = np.array([0,130,130])
     mask = cv2.inRange(raw, lower_b, upper_b)
@@ -81,6 +81,8 @@ def detector(data):
                 arrival = False
             else:
                 ang_vel = 10 * (1-2*centerX/raw_x)
+            if M["m00"] < 20000:
+                lin_vel = 2
         if len(cnts)==0:
             ang_vel = 10
 
