@@ -18,6 +18,7 @@ poi_focus = 'door' #available poi types are: door, person
 
 poi_pose_list=[]
 poi_wp_list=[]
+deleted = []
 engage = False
 waiting = True
 n=1
@@ -28,8 +29,8 @@ start.buttons = [0,0,0,0,0,0,0,1,0,0,0]
 start.header.frame_id = "teleop_panel"
 
 stop = Joy()
-stop.axes = [0,0,0,0,0,0,0,0]
-stop.buttons = [1,0,0,0,0,0,0,0,0,0,0]
+stop.axes = [0,1,0,0,0,0,0,0]
+stop.buttons = [0,0,0,0,0,0,0,1,0,0,0]
 stop.header.frame_id = "teleop_panel"
 
 script_dir = Path( __file__ ).parent.absolute()
@@ -38,9 +39,10 @@ start_screen = cv2.imread(start_path)
 
 def del_model(model):
     model_name = model.data
-    rospy.wait_for_service('/gazebo/delete_model')
-    del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
+    if model_name in deleted:
+        return
     del_model_proxy(model_name)
+    deleted.append(model_name)
     rospy.loginfo('destroyed' + model_name)
     return
 
@@ -73,6 +75,8 @@ def update_goal_status(msg):
 if __name__ == '__main__':
     rospy.init_node('navi')
     rate = rospy.Rate(10)
+    rospy.wait_for_service('/gazebo/delete_model')
+    del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
     while(True):
         cv2.imshow('waiting...', start_screen)
         k = cv2.waitKey(0)
