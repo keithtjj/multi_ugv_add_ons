@@ -14,10 +14,11 @@ pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=5)
 pub_arrival = rospy.Publisher('/arrival', String, queue_size=5)
 pub_joy = rospy.Publisher('/joy', Joy, queue_size=5)
 
-poi_focus = 'person' #available poi types are: door, person
+poi_focus = 'door' #available poi types are: door, person
 
 poi_pose_list=[]
 poi_wp_list=[]
+deleted = []
 engage = False
 waiting = True
 n=1
@@ -38,11 +39,10 @@ start_screen = cv2.imread(start_path)
 
 def del_model(model):
     model_name = model.data
-    if model_name == 'test':
+    if model_name in deleted:
         return
-    rospy.wait_for_service('/gazebo/delete_model')
-    del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
     del_model_proxy(model_name)
+    deleted.append(model_name)
     rospy.loginfo('destroyed' + model_name)
     return
 
@@ -75,6 +75,8 @@ def update_goal_status(msg):
 if __name__ == '__main__':
     rospy.init_node('navi')
     rate = rospy.Rate(10)
+    rospy.wait_for_service('/gazebo/delete_model')
+    del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
     while(True):
         cv2.imshow('waiting...', start_screen)
         k = cv2.waitKey(0)

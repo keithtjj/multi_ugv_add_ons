@@ -14,6 +14,8 @@ pub_kill = rospy.Publisher('/del_model', String, queue_size=5)
 
 tare_mode = True
 current_pose = Pose()
+deleted = []
+door_list = [['door1', 43, -9], ['door2', 85, -4], ['door4', 56, 57], ['door3', 10, -2]]
 
 script_dir = Path( __file__ ).parent.absolute()
 start_path = str(script_dir.joinpath('start.png'))
@@ -21,11 +23,10 @@ start_screen = cv2.imread(start_path)
 
 def del_model(model):
     model_name = model.data
-    if model_name == 'test':
+    if model_name in deleted:
         return
-    rospy.wait_for_service('/gazebo/delete_model')
-    del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
     del_model_proxy(model_name)
+    deleted.append(model_name)
     rospy.loginfo('destroyed' + model_name)
     return
 
@@ -50,6 +51,8 @@ def get_pos(data):
 if __name__ == '__main__':
     # Initialize the ROS node
     rospy.init_node('saver')
+    rospy.wait_for_service('/gazebo/delete_model')
+    del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
     while(True):
         cv2.imshow('waiting...', start_screen)
         k = cv2.waitKey(0)
