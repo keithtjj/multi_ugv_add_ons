@@ -50,7 +50,7 @@ def process_detects(detects):
     global poi_list, yolo_dets
     yolo_dets = []
     for d in detects.dets:
-        yolo_dets.append(d.bbox)
+        yolo_dets.append(d)
         if d.name != 'person':
             continue
         b = d.bbox

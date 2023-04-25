@@ -98,8 +98,8 @@ def detector(data):
                     arrival = False
                 else:
                     rospy.loginfo('aiming')
-                    ang_vel = 30 * (1-2*center[0]/raw_x)
-                    h = y1-y2
+                    ang_vel = 10 * (1-2*center[0]/raw_x)
+                    h = y2-y1
                     if h < 90:
                         lin_vel = 10 * (1-h/90)
                     

@@ -56,9 +56,9 @@ def process_detects(detects):
         for (x1, y1, x2, y2) in persons:
             #rospy.loginfo('identified')
             center_x = (x1+x2)/2
-            h = y1-y2
-            ang_vel = 30 * (1-2*center_x/raw_x)
-            lin_vel = 30 * (1-h/90)
+            h = y2-y1
+            ang_vel = 10 * (1-2*center_x/raw_x)
+            lin_vel = 10 * (1-h/90)
 
     pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
                                 twist=(Twist(linear = Vector3(lin_vel,0,0), angular = Vector3(0,0,ang_vel)))))
