@@ -22,12 +22,6 @@ yolo_dets = []
 def callback(data):
     raw = bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
     pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose))
-    # detect people in the image
-    for d in yolo_dets:
-        b = d.bbox
-        colour=(randint(0,255), randint(0,255), randint(0,255))
-        cv2.rectangle(raw, (b[0], b[1]), (b[2], b[3]), colour, 1)
-        center = int((b[0]+b[2])/2), int((b[1]+b[3])/2)
 
     #find doors
     lower_b = np.array([0,100,100])
@@ -42,6 +36,14 @@ def callback(data):
             pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='door'), pose=current_pose))
             poi_list.append(current_pose)
             rospy.loginfo('door')
+
+    # detect people in the image
+    for d in yolo_dets:
+        b = d.bbox
+        colour=(randint(0,255), randint(0,255), randint(0,255))
+        cv2.rectangle(raw, (b[0], b[1]), (b[2], b[3]), colour, 1)
+        center = int((b[0]+b[2])/2), int((b[1]+b[3])/2)
+        
     raw = cv2.resize(raw, (0,0), fx=2,fy=2)
     cv2.imshow("hunter", raw)
     cv2.waitKey(1)

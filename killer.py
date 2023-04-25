@@ -44,14 +44,6 @@ def detector(data):
     global engage, arrival
     raw = bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
     pub_kill.publish(String('test'))
-
-    # detect people in the image
-    # returns the bounding boxes for the detected objects
-    for d in yolo_dets:
-        colour=(randint(0,255), randint(0,255), randint(0,255))
-        b = d.bbox
-        cv2.rectangle(raw, (b[0], b[1]), (b[2], b[3]), colour, 1)
-        center = int((b[0]+b[2])/2), int((b[1]+b[3])/2)
     
     #find doors
     #(T, thresh) = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
@@ -61,10 +53,18 @@ def detector(data):
     cnts, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for c in cnts:
         cv2.drawContours(raw, [c], -1, (0, 255, 0), 2)
+
+    # detect people in the image
+    # returns the bounding boxes for the detected objects
+    for d in yolo_dets:
+        colour=(randint(0,255), randint(0,255), randint(0,255))
+        b = d.bbox
+        cv2.rectangle(raw, (b[0], b[1]), (b[2], b[3]), colour, 1)
+        center = int((b[0]+b[2])/2), int((b[1]+b[3])/2)
     raw = cv2.resize(raw, (0,0), fx=2,fy=2)
+
     cv2.imshow("killer", raw)
     cv2.waitKey(1)
-    
     if not arrival:
         return
     
@@ -102,7 +102,6 @@ def detector(data):
                     h = y2-y1
                     if h < 90:
                         lin_vel = 10 * (1-h/90)
-                    
         else:
             ang_vel = 10
             rospy.loginfo('not found')
