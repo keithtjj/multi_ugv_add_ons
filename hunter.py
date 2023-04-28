@@ -17,7 +17,7 @@ def process_detects(detects):
     global poi_list
     poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose)
     for d in detects.dets:
-        if compare_pose(5):
+        if compare_pose(5, d.name):
             poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id=d.name), pose=current_pose)
             poi_list.append(poi)
             rospy.loginfo(d.name)
@@ -25,11 +25,13 @@ def process_detects(detects):
     if len(detects.dets) == 0:
         pub_poi.publish(poi)
 
-def compare_pose(r):
+def compare_pose(r, name):
     global current_pose
     for po in poi_list:
-        dx = current_pose.position.x - po.position.x
-        dy = current_pose.position.y - po.position.y
+        if po.header.frame_id != name:
+            return
+        dx = current_pose.position.x - po.pose.position.x
+        dy = current_pose.position.y - po.pose.position.y
         dxy = dx**2 + dy**2
         #print(dxy)
         if dxy < r**2:
