@@ -29,7 +29,7 @@ def compare_pose(r, name):
     global current_pose
     for po in poi_list:
         if po.header.frame_id != name:
-            return
+            continue
         dx = current_pose.position.x - po.pose.position.x
         dy = current_pose.position.y - po.pose.position.y
         dxy = dx**2 + dy**2
