@@ -36,6 +36,8 @@ def del_model_sel(m):
     pub_kill.publish(String(m))
 
 def process_detects(detects):
+    if not arrival:
+        return
     global targets
     targets = []
     for d in detects.dets:
