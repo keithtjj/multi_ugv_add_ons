@@ -12,18 +12,18 @@ pub_poi = rospy.Publisher('/poi_out', PoseStamped, queue_size=10)
 engage = False
 current_pose = Pose()
 poi_list = []
-yolo_dets = []
 
 def process_detects(detects):
     global poi_list
+    poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose)
     for d in detects.dets:
-        yolo_dets.append(d)
-        b = d.bbox
-        center = int((b[0]+b[2])/2), int((b[1]+b[3])/2)
         if compare_pose(5):
-            poi_list.append(current_pose)
+            poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id=d.name), pose=current_pose)
+            poi_list.append(poi)
             rospy.loginfo(d.name)
-            pub_poi.publish(PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id=d.name), pose=current_pose))
+            pub_poi.publish(poi)
+    if len(detects.dets) == 0:
+        pub_poi.publish(poi)
 
 def compare_pose(r):
     global current_pose
