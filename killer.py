@@ -36,6 +36,8 @@ def del_model_sel(m):
     pub_kill.publish(String(m))
 
 def process_detects(detects):
+    pub_kill.publish(String('test'))
+    global arrival
     if not arrival:
         return
     global targets
@@ -78,4 +80,3 @@ if __name__ == '__main__':
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
     rospy.Subscriber('/detections', Detections, process_detects)
     rospy.spin()
-    cv2.destroyAllWindows()
