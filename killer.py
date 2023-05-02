@@ -57,7 +57,9 @@ def process_detects(detects):
                     pub_engaged.publish(Bool(False))
                     arrival = False
                 else:
-                    ang_vel = 10 * (1-2*centerX/rawX)
+                    ang_vel = 20 * (1-2*centerX/rawX)
+                    area = (x1-x2)*(y2-y1)
+                    lin_vel = 20 * (1-area/10000)
             elif poi_type == 'person':
                 h = y2-y1
                 ang_vel = 20 * (1-2*centerX/rawX)
