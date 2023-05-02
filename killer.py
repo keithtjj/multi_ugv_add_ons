@@ -14,7 +14,7 @@ door_list = [['door1', 43, -9], ['door2', 85, -4], ['door4', 56, 57], ['door3', 
 engage = False
 arrival = False
 rawX = 320
-targets = []
+last_seen = 0
 
 def get_pos(data):
     global current_pose 
@@ -37,10 +37,9 @@ def del_model_sel(m):
 
 def process_detects(detects):
     pub_kill.publish(String('test'))
-    global arrival
+    global arrival, last_seen
     if not arrival:
         return
-    global targets
     targets = []
     for d in detects.dets:
         if d.name == poi_type:
@@ -59,15 +58,20 @@ def process_detects(detects):
                 else:
                     ang_vel = 10 * (1-2*centerX/rawX)
                     area = (x1-x2)*(y2-y1)
-                    lin_vel = 5 * (1-area/7000)
+                    lin_vel = 2 * (1-area/7000)
             elif poi_type == 'person':
                 h = y2-y1
-                ang_vel = 20 * (1-2*centerX/rawX)
-                lin_vel = 20 * (1-h/120)
+                ang_vel = 10 * (1-2*centerX/rawX)
+                lin_vel = 10 * (1-h/120)
             else:
-                rospy.loginfo('idk what to do')
+                rospy.loginfo('unknown poi, idk what to do')
+            last_seen = centerX
         else:
             rospy.loginfo('too many/none')
+            if last_seen > rawX/2:
+                ang_vel = -10
+            elif last_seen < rawX/2:
+                ang_vel = 10
     pub_vel.publish(TwistStamped(header=Header(stamp=rospy.Time.now(),frame_id='vehicle'),
                                 twist=(Twist(linear = Vector3(lin_vel,0,0), angular = Vector3(0,0,ang_vel)))))
 

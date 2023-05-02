@@ -9,7 +9,6 @@ from random import randint
 
 pub_poi = rospy.Publisher('/poi_out', PoseStamped, queue_size=10)
 
-engage = False
 current_pose = Pose()
 poi_list = []
 
