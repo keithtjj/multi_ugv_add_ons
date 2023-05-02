@@ -11,6 +11,7 @@ import cv2
 pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=1)
 pub_poi = rospy.Publisher('/poi_out', PoseStamped, queue_size=10)
 pub_kill = rospy.Publisher('/del_model', String, queue_size=5)
+pub_refresh_mqtt = rospy.Publisher('/refresh_mqtt', String, queue_size=5)
 
 tare_mode = True
 current_pose = Pose()
@@ -59,10 +60,11 @@ if __name__ == '__main__':
         print(k)
         if k == 27:
             cv2.destroyWindow('waiting...')
+            pub_refresh_mqtt.publish('refresh')
             break
 
     rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
     rospy.Subscriber('/toggle_tare', Bool, tare_switch) 
-    rospy.Subscriber('/del_model', String, del_model)
+    rospy.Subscriber('/del_model_in', String, del_model)
     rospy.spin()

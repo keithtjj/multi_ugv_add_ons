@@ -13,6 +13,7 @@ pub_gp = rospy.Publisher('/goal_point', PointStamped, queue_size=5)
 pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=5)
 pub_arrival = rospy.Publisher('/arrival', String, queue_size=5)
 pub_joy = rospy.Publisher('/joy', Joy, queue_size=5)
+pub_refresh_mqtt = rospy.Publisher('/refresh_mqtt', String, queue_size=5)
 
 poi_focus = 'door' #available poi types are: door, person
 
@@ -83,13 +84,15 @@ if __name__ == '__main__':
         print(k)
         if k == 27:
             cv2.destroyWindow('waiting...')
+            pub_refresh_mqtt.publish('refresh')
             break  
+
     rospy.loginfo('ready, waiting for pois')
     while not rospy.is_shutdown():
         rospy.Subscriber('/engaged', Bool, set_engage)
         rospy.Subscriber('/poi_in', PoseStamped, save_poi)
         rospy.Subscriber('/far_reach_goal_status', Bool, update_goal_status)
-        rospy.Subscriber('/del_model', String, del_model)
+        rospy.Subscriber('/del_model_in', String, del_model)
 
         if engage:
             continue

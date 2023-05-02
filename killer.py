@@ -50,7 +50,7 @@ def process_detects(detects):
     for (x1, y1, x2, y2) in targets:
         if len(targets) == 1:
             centerX = int((x1+x2)/2)
-            rospy.loginfo('identified')
+            #rospy.loginfo('identified')
             if poi_type == 'door':
                 if rawX/3 < centerX < rawX*2/3:
                     del_model_sel('door')
@@ -60,8 +60,8 @@ def process_detects(detects):
                     ang_vel = 10 * (1-2*centerX/rawX)
             elif poi_type == 'person':
                 h = y2-y1
-                ang_vel = 10 * (1-2*centerX/rawX)
-                lin_vel = 10 * (1-h/90)
+                ang_vel = 20 * (1-2*centerX/rawX)
+                lin_vel = 20 * (1-h/120)
             else:
                 rospy.loginfo('idk what to do')
         else:
