@@ -22,6 +22,7 @@ poi_wp_list=[]
 deleted = []
 engage = False
 waiting = True
+tare_mode = True
 n=1
 
 start = Joy()
@@ -73,12 +74,22 @@ def update_goal_status(msg):
         rospy.loginfo('arrived at poi '+str(n))
         n+=1
 
+def tare_switch(tog):
+    global tare_mode
+    tare_mode = tog.data
+
+def wp_rebro(data):
+    #rospy.loginfo("Received point at time %d", data.header.stamp.to_sec())
+    if tare_mode:
+        tare_wp = data
+        pub_wp.publish(tare_wp)
+
 if __name__ == '__main__':
     rospy.init_node('navi')
     rate = rospy.Rate(10)
     rospy.wait_for_service('/gazebo/delete_model')
     del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
-    while(True):
+    while not rospy.is_shutdown():
         cv2.imshow('waiting...', start_screen)
         k = cv2.waitKey(0)
         print(k)
@@ -93,6 +104,8 @@ if __name__ == '__main__':
         rospy.Subscriber('/poi_in', PoseStamped, save_poi)
         rospy.Subscriber('/far_reach_goal_status', Bool, update_goal_status)
         rospy.Subscriber('/del_model_in', String, del_model)
+        rospy.Subscriber('/toggle_wp', Bool, tare_switch)
+        rospy.Subscriber('/far_way_point', PointStamped, wp_rebro) 
 
         if engage:
             continue

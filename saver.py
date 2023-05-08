@@ -33,17 +33,13 @@ def del_model(model):
 
 def wp_rebro(data):
     #rospy.loginfo("Received point at time %d", data.header.stamp.to_sec())
-    global tare_mode
     if tare_mode:
         tare_wp = data
         pub_wp.publish(tare_wp)
-    return
 
 def tare_switch(tog):
     global tare_mode
     tare_mode = tog.data
-    pub_wp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=current_pose.position))
-    return
 
 def get_pos(data):
     global current_pose 
@@ -54,7 +50,7 @@ if __name__ == '__main__':
     rospy.init_node('saver')
     rospy.wait_for_service('/gazebo/delete_model')
     del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
-    while(True):
+    while not rospy.is_shutdown():
         cv2.imshow('waiting...', start_screen)
         k = cv2.waitKey(0)
         print(k)
@@ -65,6 +61,6 @@ if __name__ == '__main__':
 
     rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
     rospy.Subscriber('/state_estimation', Odometry, get_pos)
-    rospy.Subscriber('/toggle_tare', Bool, tare_switch) 
+    rospy.Subscriber('/toggle_wp', Bool, tare_switch) 
     rospy.Subscriber('/del_model_in', String, del_model)
     rospy.spin()
