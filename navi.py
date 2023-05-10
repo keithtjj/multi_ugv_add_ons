@@ -54,6 +54,8 @@ def set_engage(bool):
 
 def save_poi(msg):
     global poi_pose_list, poi_wp_list
+    if msg.header.frame_id == 'test':
+        print('test poi')
     if msg.header.frame_id != poi_focus:
         return
     #rospy.loginfo("received poi")

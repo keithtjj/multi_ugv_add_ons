@@ -14,15 +14,15 @@ poi_list = []
 
 def process_detects(detects):
     global poi_list
-    poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose)
+    #poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose)
     for d in detects.dets:
         if compare_pose(5, d.name):
             poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id=d.name), pose=current_pose)
             poi_list.append(poi)
             rospy.loginfo(d.name)
             pub_poi.publish(poi)
-    if len(detects.dets) == 0:
-        pub_poi.publish(poi)
+    #if len(detects.dets) == 0:
+    #    pub_poi.publish(poi)
 
 def compare_pose(r, name):
     global current_pose
