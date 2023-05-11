@@ -5,7 +5,6 @@ from std_msgs.msg import Header
 from geometry_msgs.msg import PoseStamped, Pose
 from nav_msgs.msg import Odometry
 from yolov7_ros.msg import Detection, Detections
-from random import randint
 
 pub_poi = rospy.Publisher('/poi_out', PoseStamped, queue_size=10)
 

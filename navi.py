@@ -93,11 +93,11 @@ if __name__ == '__main__':
     del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
     while not rospy.is_shutdown():
         cv2.imshow('waiting...', start_screen)
-        k = cv2.waitKey(0)
+        k = cv2.waitKey(1)
         print(k)
         if k == 27:
             cv2.destroyWindow('waiting...')
-            pub_refresh_mqtt.publish('refresh')
+            #pub_refresh_mqtt.publish('refresh')
             break  
 
     rospy.loginfo('ready, waiting for pois')

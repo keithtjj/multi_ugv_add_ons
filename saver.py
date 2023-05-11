@@ -10,9 +10,7 @@ import cv2
 
 pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=1)
 pub_poi = rospy.Publisher('/poi_out', PoseStamped, queue_size=10)
-pub_kill = rospy.Publisher('/del_model', String, queue_size=5)
-pub_refresh_mqtt = rospy.Publisher('/refresh_mqtt', String, queue_size=5)
-pub_poi = rospy.Publisher('/poi_out', PoseStamped, queue_size=10)
+#pub_refresh_mqtt = rospy.Publisher('/refresh_mqtt', String, queue_size=5)
 
 tare_mode = True
 current_pose = Pose()
@@ -53,13 +51,13 @@ if __name__ == '__main__':
     del_model_proxy = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
     while not rospy.is_shutdown():
         cv2.imshow('waiting...', start_screen)
-        k = cv2.waitKey(0)
+        k = cv2.waitKey(1)
         print(k)
         if k == 27:
             cv2.destroyWindow('waiting...')
             poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose)
             pub_poi.publish(poi)
-            pub_refresh_mqtt.publish('refresh')
+            #pub_refresh_mqtt.publish('refresh')
             break
 
     rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
