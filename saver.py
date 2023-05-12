@@ -52,7 +52,7 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         cv2.imshow('waiting...', start_screen)
         k = cv2.waitKey(1)
-        print(k)
+        #print(k)
         if k == 27:
             cv2.destroyWindow('waiting...')
             poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose)

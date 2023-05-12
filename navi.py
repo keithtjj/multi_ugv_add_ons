@@ -14,6 +14,7 @@ pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=5)
 pub_arrival = rospy.Publisher('/arrival', String, queue_size=5)
 pub_joy = rospy.Publisher('/joy', Joy, queue_size=5)
 pub_refresh_mqtt = rospy.Publisher('/refresh_mqtt', String, queue_size=5)
+pub_kill = rospy.Publisher('/del_model_out', String, queue_size=5)
 
 poi_focus = 'door' #available poi types are: door, person
 
@@ -94,9 +95,10 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         cv2.imshow('waiting...', start_screen)
         k = cv2.waitKey(1)
-        print(k)
+        #print(k)
         if k == 27:
             cv2.destroyWindow('waiting...')
+            pub_kill.publish(String('test'))
             #pub_refresh_mqtt.publish('refresh')
             break  
 

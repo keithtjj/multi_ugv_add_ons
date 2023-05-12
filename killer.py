@@ -36,7 +36,6 @@ def del_model_sel(m):
     pub_kill.publish(String(m))
 
 def process_detects(detects):
-    pub_kill.publish(String('test'))
     global arrival, last_seen
     if not arrival:
         return
