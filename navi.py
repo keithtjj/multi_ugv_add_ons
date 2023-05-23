@@ -17,7 +17,8 @@ pub_kill = rospy.Publisher('/del_model_out', String, queue_size=5)
 
 poi_focus = 'door' #available poi types are: door, person
 
-poi_list=[]
+overall_poi_list = []
+next_poi_list = []
 deleted = []
 engage = False
 waiting = True
@@ -53,14 +54,15 @@ def set_engage(bool):
     engage = bool.data
 
 def save_poi(msg):
-    global poi_list
+    global next_poi_list, overall_poi_list
     if msg.header.frame_id == 'test':
         print('test poi')
     if msg.header.frame_id != poi_focus:
         return
     #rospy.loginfo("received poi")
-    if not (msg in poi_list):
-        poi_list.append(msg.pose)
+    if not (msg.point in overall_poi_list):
+        overall_poi_list.append(msg.point)
+        next_poi_list.append(msg)
         rospy.loginfo("added new poi")
 
 def tare_switch(tog):
@@ -74,7 +76,8 @@ def wp_rebro(data):
         pub_wp.publish(tare_wp)
 
 def pose_call(msg):
-    r = 1
+    r = 3
+    global engage, n
     if next_point.point == Point(0,0,0) or engage:
         return
     dx = msg.pose.position.x - next_point.point.x
@@ -84,8 +87,8 @@ def pose_call(msg):
         engage = True
         stop.header.stamp = rospy.Time.now()
         pub_joy.publish(stop)
-        pub_arrival.publish(String(poi_list[0].header.frame_id))
-        poi_list.pop(0)
+        pub_arrival.publish(String(next_poi_list[0].header.frame_id))
+        next_poi_list.pop(0)
         rospy.loginfo('arrived at poi '+str(n))
         n+=1
 
@@ -126,7 +129,7 @@ if __name__ == '__main__':
             waiting = True
 
         elif len(poi_list)>0:
-            next_point = PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=poi_list[0].point)
+            next_point = PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=next_poi_list[0].point)
             pub_gp.publish(next_point)
             rospy.loginfo('going to poi ' + str(n))
             waiting = False

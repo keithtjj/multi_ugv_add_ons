@@ -58,16 +58,13 @@ def poi_callback(det_msg, scan_msg, info_msg):
                 possible_points[kd] = pp
         key = min(possible_points.keys())
         poi_xyz = possible_points[key]
-        print(poi_xyz)
         poi = PointStamped(header=Header(stamp=rospy.Time.now(),frame_id=det.name), point=Point(poi_xyz[0], poi_xyz[1], poi_xyz[2]))
 
         if compare_pois(poi, 3, det.name):
             poi_list.append(poi)
             rospy.loginfo(len(poi_list))
-            rospy.loginfo(det.name)
+            rospy.loginfo(poi)
             pub_poi.publish(poi)
-        poi.header.frame_id='map'
-        pub_poi.publish(poi)
 
 def compare_pois(poi, r, name):
     for prev_poi in poi_list:
