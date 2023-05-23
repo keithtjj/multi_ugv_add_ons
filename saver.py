@@ -7,10 +7,11 @@ from nav_msgs.msg import Odometry
 from gazebo_msgs.srv import DeleteModel
 from pathlib import Path
 import cv2
+from tare_msgs.msg import NodeAndEdge
 
 pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=1)
 pub_poi = rospy.Publisher('/poi_out', PoseStamped, queue_size=10)
-#pub_refresh_mqtt = rospy.Publisher('/refresh_mqtt', String, queue_size=5)
+pub_keypose = rospy.Publisher('/sensor_coverage_planner/tare_planner_node/new_keypose', NodeAndEdge, queue_size=5)
 
 tare_mode = True
 current_pose = Pose()
@@ -57,6 +58,8 @@ if __name__ == '__main__':
             cv2.destroyWindow('waiting...')
             poi = PoseStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), pose=current_pose)
             pub_poi.publish(poi)
+            noe = NodeAndEdge(node_ind=0,keypose_id=0)
+            pub_keypose.publish(noe)
             #pub_refresh_mqtt.publish('refresh')
             break
 
