@@ -76,7 +76,7 @@ def wp_rebro(data):
         pub_wp.publish(tare_wp)
 
 def pose_call(msg):
-    r = 3
+    r = 4
     global engage, n
     if next_point.point == Point(0,0,0) or engage:
         return
