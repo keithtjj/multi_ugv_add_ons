@@ -13,24 +13,23 @@ pub_gp = rospy.Publisher('/goal_point', PointStamped, queue_size=5)
 pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=5)
 pub_arrival = rospy.Publisher('/arrival', String, queue_size=5)
 pub_joy = rospy.Publisher('/joy', Joy, queue_size=5)
-pub_refresh_mqtt = rospy.Publisher('/refresh_mqtt', String, queue_size=5)
 pub_kill = rospy.Publisher('/del_model_out', String, queue_size=5)
 
 poi_focus = 'door' #available poi types are: door, person
 
-poi_pose_list=[]
-poi_wp_list=[]
+poi_list=[]
 deleted = []
 engage = False
 waiting = True
 tare_mode = True
 n=1
+next_point = PointStamped()
 
+# start/stop for far waypoint
 start = Joy()
 start.axes = [0,0,-1.0,0,1.0,1.0,0,0]
 start.buttons = [0,0,0,0,0,0,0,1,0,0,0]
 start.header.frame_id = "teleop_panel"
-
 stop = Joy()
 stop.axes = [0,1,0,0,0,0,0,0]
 stop.buttons = [0,0,0,0,0,0,0,1,0,0,0]
@@ -54,28 +53,15 @@ def set_engage(bool):
     engage = bool.data
 
 def save_poi(msg):
-    global poi_pose_list, poi_wp_list
+    global poi_list
     if msg.header.frame_id == 'test':
         print('test poi')
     if msg.header.frame_id != poi_focus:
         return
     #rospy.loginfo("received poi")
-    if not (msg.pose in poi_pose_list):
-        poi_pose_list.append(msg.pose)
-        wp = PointStamped(header=msg.header, point = msg.pose.position)
-        poi_wp_list.append(wp)
+    if not (msg in poi_list):
+        poi_list.append(msg.pose)
         rospy.loginfo("added new poi")
-
-def update_goal_status(msg):
-    global n, engage, poi_wp_list, stop
-    if msg.data == True and len(poi_wp_list) != 0 and not engage:    
-        engage = True
-        stop.header.stamp = rospy.Time.now()
-        pub_joy.publish(stop)
-        pub_arrival.publish(String(poi_wp_list[0].header.frame_id))
-        poi_wp_list.remove(poi_wp_list[0])
-        rospy.loginfo('arrived at poi '+str(n))
-        n+=1
 
 def tare_switch(tog):
     global tare_mode
@@ -86,6 +72,22 @@ def wp_rebro(data):
     if tare_mode:
         tare_wp = data
         pub_wp.publish(tare_wp)
+
+def pose_call(msg):
+    r = 1
+    if next_point.point == Point(0,0,0) or engage:
+        return
+    dx = msg.pose.position.x - next_point.point.x
+    dy = msg.pose.position.y - next_point.point.y
+    dxy = dx**2 + dy**2
+    if dxy < r**2:
+        engage = True
+        stop.header.stamp = rospy.Time.now()
+        pub_joy.publish(stop)
+        pub_arrival.publish(String(poi_list[0].header.frame_id))
+        poi_list.pop(0)
+        rospy.loginfo('arrived at poi '+str(n))
+        n+=1
 
 if __name__ == '__main__':
     rospy.init_node('navi')
@@ -105,8 +107,8 @@ if __name__ == '__main__':
     rospy.loginfo('ready, waiting for pois')
     while not rospy.is_shutdown():
         rospy.Subscriber('/engaged', Bool, set_engage)
-        rospy.Subscriber('/poi_in', PoseStamped, save_poi)
-        rospy.Subscriber('/far_reach_goal_status', Bool, update_goal_status)
+        rospy.Subscriber('/poi_in', PointStamped, save_poi)
+        rospy.Subscriber('/pose_stamp', PoseStamped, pose_call)
         rospy.Subscriber('/del_model_in', String, del_model)
         rospy.Subscriber('/toggle_wp', Bool, tare_switch)
         rospy.Subscriber('/far_way_point', PointStamped, wp_rebro) 
@@ -117,14 +119,16 @@ if __name__ == '__main__':
             start.header.stamp = rospy.Time.now()
             pub_joy.publish(start)
 
-        if len(poi_wp_list) == 0 and not waiting:
-            pub_gp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=Point(0,0,0)))
+        if len(poi_list) == 0 and not waiting:
+            next_point = PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=Point(0,0,0))
+            pub_gp.publish(next_point)
             rospy.loginfo('going home, waiting for new pois')
             waiting = True
 
-        elif len(poi_wp_list)>0:
-            pub_gp.publish(PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=poi_wp_list[0].point))
-            rospy.loginfo('going to poi '+str(n))
+        elif len(poi_list)>0:
+            next_point = PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=poi_list[0].point)
+            pub_gp.publish(next_point)
+            rospy.loginfo('going to poi ' + str(n))
             waiting = False
 
         rate.sleep()
