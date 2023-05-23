@@ -122,13 +122,13 @@ if __name__ == '__main__':
             start.header.stamp = rospy.Time.now()
             pub_joy.publish(start)
 
-        if len(poi_list) == 0 and not waiting:
+        if len(next_poi_list) == 0 and not waiting:
             next_point = PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=Point(0,0,0))
             pub_gp.publish(next_point)
             rospy.loginfo('going home, waiting for new pois')
             waiting = True
 
-        elif len(poi_list)>0:
+        elif len(next_poi_list)>0:
             next_point = PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='map'), point=next_poi_list[0].point)
             pub_gp.publish(next_point)
             rospy.loginfo('going to poi ' + str(n))
