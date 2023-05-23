@@ -83,7 +83,7 @@ def pose_call(msg):
     dx = msg.pose.position.x - next_point.point.x
     dy = msg.pose.position.y - next_point.point.y
     dxy = dx**2 + dy**2
-    if dxy < r**2:
+    if dxy < r**2 and not engage:
         engage = True
         stop.header.stamp = rospy.Time.now()
         pub_joy.publish(stop)
