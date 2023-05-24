@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy 
-from std_msgs.msg import Header
+from std_msgs.msg import Header, ColorRGBA
 from geometry_msgs.msg import PointStamped, PoseStamped, Point
 from nav_msgs.msg import Odometry
 from yolov7_ros.msg import Detection, Detections
@@ -12,8 +12,10 @@ import tf
 from tf.transformations import quaternion_matrix, translation_matrix
 import message_filters
 import numpy as np
+from visualization_msgs.msg import Marker
 
 pub_poi = rospy.Publisher('/poi_out', PointStamped, queue_size=10)
+pub_vis = rospy.Publisher('/poi_map', Marker, queue_size=10)
 
 cam = PinholeCameraModel()
 poi_list = []
@@ -26,7 +28,7 @@ def poi_callback(det_msg, scan_msg, info_msg):
         center_rectified = cam.rectifyPoint(center)
         vector = cam.projectPixelTo3dRay(center_rectified)
         try:
-            (trans,rot) = listener.lookupTransform('/map', '/camera', rospy.Time.from_sec(scan_msg.header.stamp.secs))
+            (trans,rot) = listener.lookupTransform('/map', '/camera', rospy.Time.from_sec(det_msg.header.stamp.secs))
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
             return
         rot_mat = quaternion_matrix(rot)
@@ -60,15 +62,17 @@ def poi_callback(det_msg, scan_msg, info_msg):
         poi_xyz = possible_points[key]
         poi = PointStamped(header=Header(stamp=rospy.Time.now(),frame_id=det.name), point=Point(poi_xyz[0], poi_xyz[1], poi_xyz[2]))
 
-        if compare_pois(poi, 3, det.name):
+        if compare_pois(poi, 4, det.name):
             poi_list.append(poi)
             rospy.loginfo(len(poi_list))
             rospy.loginfo(poi)
             pub_poi.publish(poi)
 
+    generate_visual(poi_list)
+
 def compare_pois(poi, r, name):
     for prev_poi in poi_list:
-        if poi.header.frame_id != name:
+        if prev_poi.header.frame_id != name:
             continue
         dx = prev_poi.point.x - poi.point.x
         dy = prev_poi.point.y - poi.point.y
@@ -77,12 +81,29 @@ def compare_pois(poi, r, name):
             return False
     return True
 
+def generate_visual(list):
+    marker = Marker()
+    marker.header = Header(frame_id = 'map', stamp = rospy.Time.now())
+    marker.id = 259683
+    marker.type = 7
+    marker.scale.x = 1
+    marker.scale.y = 0.1
+    marker.scale.z = 0.1
+    marker.pose.orientation.w = 1
+    for point in list:
+        marker.points.append(point.point)
+        if point.header.frame_id == 'door':
+            marker.colors.append(ColorRGBA(1.0,0.9,0.1,1.0))
+        else:
+            marker.colors.append(ColorRGBA(1.0,1.0,1.0,1.0))
+    pub_vis.publish(marker)
+
 if __name__ == '__main__':
     rospy.init_node('hunter')
     listener = tf.TransformListener()
     det_sub = message_filters.Subscriber('/detections', Detections)
     scan_sub = message_filters.Subscriber('/registered_scan', PointCloud2)
     info_sub = message_filters.Subscriber('/camera/camera_info', CameraInfo)
-    ts = message_filters.ApproximateTimeSynchronizer([det_sub, scan_sub, info_sub], 1, 0.1)
+    ts = message_filters.ApproximateTimeSynchronizer([det_sub, scan_sub, info_sub], 10, 0.1)
     ts.registerCallback(poi_callback)
     rospy.spin()

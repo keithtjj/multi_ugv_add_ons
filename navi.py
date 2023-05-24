@@ -28,7 +28,7 @@ next_point = PointStamped()
 
 # start/stop for far waypoint
 start = Joy()
-start.axes = [0,0,-1.0,0,1.0,1.0,0,0]
+start.axes = [0,0,-1,0,1,1,0,0]
 start.buttons = [0,0,0,0,0,0,0,1,0,0,0]
 start.header.frame_id = "teleop_panel"
 stop = Joy()

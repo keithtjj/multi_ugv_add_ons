@@ -12,6 +12,7 @@ from tare_msgs.msg import NodeAndEdge
 pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=1)
 pub_poi = rospy.Publisher('/poi_out', PointStamped, queue_size=10)
 pub_keypose = rospy.Publisher('/sensor_coverage_planner/tare_planner_node/new_keypose', NodeAndEdge, queue_size=5)
+pub_start = rospy.Publisher('/start_exploration', Bool, queue_size=5)
 
 tare_mode = True
 deleted = []
@@ -54,7 +55,7 @@ if __name__ == '__main__':
             pub_poi.publish(poi)
             noe = NodeAndEdge(node_ind=0,keypose_id=0)
             pub_keypose.publish(noe)
-            #pub_refresh_mqtt.publish('refresh')
+            pub_start.publish(Bool(True))
             break
 
     rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
