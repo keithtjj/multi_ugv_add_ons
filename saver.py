@@ -10,6 +10,7 @@ import cv2
 from tare_msgs.msg import NodeAndEdge
 
 pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=1)
+pub_gp = rospy.Publisher('/goal_point', PointStamped, queue_size=1)
 pub_poi = rospy.Publisher('/poi_out', PointStamped, queue_size=10)
 pub_keypose = rospy.Publisher('/sensor_coverage_planner/tare_planner_node/new_keypose', NodeAndEdge, queue_size=5)
 pub_start = rospy.Publisher('/start_exploration', Bool, queue_size=5)
@@ -30,11 +31,11 @@ def del_model(model):
     rospy.loginfo('destroyed' + model_name)
     return
 
-def wp_rebro(data):
+def tare2far(data):
     #rospy.loginfo("Received point at time %d", data.header.stamp.to_sec())
     if tare_mode:
         tare_wp = data
-        pub_wp.publish(tare_wp)
+        pub_gp.publish(tare_wp)
 
 def tare_switch(tog):
     global tare_mode
@@ -58,7 +59,8 @@ if __name__ == '__main__':
             pub_start.publish(Bool(True))
             break
 
-    rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
+    rospy.Subscriber("/tare_way_point", PointStamped, tare2far)
+    #rospy.Subscriber("/far_way_point", PointStamped, wp_rebro)
     rospy.Subscriber('/toggle_wp', Bool, tare_switch) 
     rospy.Subscriber('/del_model_in', String, del_model)
     rospy.spin()

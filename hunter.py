@@ -28,7 +28,7 @@ def poi_callback(det_msg, scan_msg, info_msg):
         center_rectified = cam.rectifyPoint(center)
         vector = cam.projectPixelTo3dRay(center_rectified)
         try:
-            (trans,rot) = listener.lookupTransform('/map', '/camera', rospy.Time.from_sec(det_msg.header.stamp.secs))
+            (trans,rot) = listener.lookupTransform('/map', '/camera', rospy.Time.now())
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
             return
         rot_mat = quaternion_matrix(rot)
@@ -62,7 +62,7 @@ def poi_callback(det_msg, scan_msg, info_msg):
         poi_xyz = possible_points[key]
         poi = PointStamped(header=Header(stamp=rospy.Time.now(),frame_id=det.name), point=Point(poi_xyz[0], poi_xyz[1], poi_xyz[2]))
 
-        if compare_pois(poi, 4, det.name):
+        if compare_pois(poi, det.name, 7):
             poi_list.append(poi)
             rospy.loginfo(len(poi_list))
             rospy.loginfo(poi)
@@ -70,7 +70,7 @@ def poi_callback(det_msg, scan_msg, info_msg):
 
     generate_visual(poi_list)
 
-def compare_pois(poi, r, name):
+def compare_pois(poi, name, r):
     for prev_poi in poi_list:
         if prev_poi.header.frame_id != name:
             continue
@@ -94,6 +94,8 @@ def generate_visual(list):
         marker.points.append(point.point)
         if point.header.frame_id == 'door':
             marker.colors.append(ColorRGBA(1.0,0.9,0.1,1.0))
+        elif point.header.frame_id == 'person':
+            marker.colors.append(ColorRGBA(1.0,0.1,0.1,1.0))
         else:
             marker.colors.append(ColorRGBA(1.0,1.0,1.0,1.0))
     pub_vis.publish(marker)
