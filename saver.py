@@ -31,15 +31,26 @@ def del_model(model):
     rospy.loginfo('destroyed' + model_name)
     return
 
-def tare2far(data):
+def wp_rebro(data):
     #rospy.loginfo("Received point at time %d", data.header.stamp.to_sec())
     if tare_mode:
         tare_wp = data
-        pub_gp.publish(tare_wp)
+        pub_wp.publish(tare_wp)
 
 def tare_switch(tog):
     global tare_mode
     tare_mode = tog.data
+
+def goal_cb(msg):
+    global tare_mode
+    tare_mode = False
+    msg.header.stamp = rospy.Time.now()
+    pub_gp(msg)
+
+def reach_status_cb(msg):
+    if msg.data:
+        global tare_mode
+        tare_mode = True
 
 if __name__ == '__main__':
     # Initialize the ROS node
@@ -59,8 +70,10 @@ if __name__ == '__main__':
             pub_start.publish(Bool(True))
             break
 
-    rospy.Subscriber("/tare_way_point", PointStamped, tare2far)
-    #rospy.Subscriber("/far_way_point", PointStamped, wp_rebro)
+    rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
+    rospy.Subscriber("/far_way_point", PointStamped, wp_rebro)
+    rospy.Subscriber("//sensor_coverage_planner/tare_planner_node/goal_point", PointStamped, goal_cb)
+    rospy.Subscriber('/far_reach_goal_status', Bool, reach_status_cb)
     rospy.Subscriber('/toggle_wp', Bool, tare_switch) 
     rospy.Subscriber('/del_model_in', String, del_model)
     rospy.spin()

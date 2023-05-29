@@ -61,8 +61,8 @@ def poi_callback(det_msg, scan_msg, info_msg):
         key = min(possible_points.keys())
         poi_xyz = possible_points[key]
         poi = PointStamped(header=Header(stamp=rospy.Time.now(),frame_id=det.name), point=Point(poi_xyz[0], poi_xyz[1], poi_xyz[2]))
-
-        if compare_pois(poi, det.name, 7):
+        print(poi)
+        if compare_pois(poi, det.name, 5):
             poi_list.append(poi)
             rospy.loginfo(len(poi_list))
             rospy.loginfo(poi)
