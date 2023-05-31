@@ -55,7 +55,7 @@ def reach_status_cb(msg):
         tare_mode = True
 
 def get_sq_dist(p1,p2):
-    (p2.x-p1.x)**2+(p2.y-p1.y)**2+(p2.z-p1.z)**2
+    return (p2.x-p1.x)**2+(p2.y-p1.y)**2+(p2.z-p1.z)**2
 
 def save_pose(msg):
     global current_point
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
     rospy.Subscriber("/pose_stamp", PoseStamped, save_pose)
     rospy.Subscriber("/far_way_point", PointStamped, wp_rebro)
-    rospy.Subscriber("/sensor_coverage_planner/tare_planner_node/goal_point", PointStamped, goal_cb)
+    #rospy.Subscriber("/sensor_coverage_planner/tare_planner_node/goal_point", PointStamped, goal_cb)
     #rospy.Subscriber('/far_reach_goal_status', Bool, reach_status_cb)
     rospy.Subscriber('/toggle_wp', Bool, tare_switch) 
     rospy.Subscriber('/del_model_in', String, del_model)
