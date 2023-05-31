@@ -1,9 +1,7 @@
 import rospy
 import rosbag
-from std_msgs.msg import Int32MultiArray, String, Bool, Header
-from geometry_msgs.msg import PointStamped, Point
-from sensor_msgs.msg import PointCloud2
-from nav_msgs.msg import Odometry
+from std_msgs.msg import String, Bool, Header
+from geometry_msgs.msg import PointStamped, Point, PoseStamped
 from gazebo_msgs.srv import DeleteModel
 from pathlib import Path
 import cv2
@@ -17,6 +15,7 @@ pub_start = rospy.Publisher('/start_exploration', Bool, queue_size=5)
 
 tare_mode = True
 deleted = []
+current_point = Point()
 
 script_dir = Path( __file__ ).parent.absolute()
 start_path = str(script_dir.joinpath('start.png'))
@@ -43,14 +42,24 @@ def tare_switch(tog):
 
 def goal_cb(msg):
     global tare_mode
-    tare_mode = False
-    msg.header.stamp = rospy.Time.now()
-    pub_gp(msg)
+    if get_sq_dist(msg.point, current_point) < 10**2:
+        tare_mode = True
+    else:
+        tare_mode = False
+        msg.header.stamp = rospy.Time.now()
+        pub_gp.publish(msg)
 
 def reach_status_cb(msg):
     if msg.data:
         global tare_mode
         tare_mode = True
+
+def get_sq_dist(p1,p2):
+    (p2.x-p1.x)**2+(p2.y-p1.y)**2+(p2.z-p1.z)**2
+
+def save_pose(msg):
+    global current_point
+    current_point = msg.pose.position
 
 if __name__ == '__main__':
     # Initialize the ROS node
@@ -71,9 +80,10 @@ if __name__ == '__main__':
             break
 
     rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
+    rospy.Subscriber("/pose_stamp", PoseStamped, save_pose)
     rospy.Subscriber("/far_way_point", PointStamped, wp_rebro)
-    rospy.Subscriber("//sensor_coverage_planner/tare_planner_node/goal_point", PointStamped, goal_cb)
-    rospy.Subscriber('/far_reach_goal_status', Bool, reach_status_cb)
+    rospy.Subscriber("/sensor_coverage_planner/tare_planner_node/goal_point", PointStamped, goal_cb)
+    #rospy.Subscriber('/far_reach_goal_status', Bool, reach_status_cb)
     rospy.Subscriber('/toggle_wp', Bool, tare_switch) 
     rospy.Subscriber('/del_model_in', String, del_model)
     rospy.spin()
