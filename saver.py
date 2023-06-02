@@ -5,15 +5,15 @@ from geometry_msgs.msg import PointStamped, Point, PoseStamped
 from gazebo_msgs.srv import DeleteModel
 from pathlib import Path
 import cv2
-from tare_msgs.msg import NodeAndEdge
+import message_filters
 
 pub_wp = rospy.Publisher('/way_point', PointStamped, queue_size=1)
 pub_gp = rospy.Publisher('/goal_point', PointStamped, queue_size=1)
 pub_poi = rospy.Publisher('/poi_out', PointStamped, queue_size=10)
-pub_keypose = rospy.Publisher('/sensor_coverage_planner/tare_planner_node/new_keypose', NodeAndEdge, queue_size=5)
 pub_start = rospy.Publisher('/start_exploration', Bool, queue_size=5)
 
 tare_mode = True
+far_mode = False
 deleted = []
 current_point = Point()
 
@@ -30,24 +30,25 @@ def del_model(model):
     rospy.loginfo('destroyed' + model_name)
     return
 
-def wp_rebro(data):
-    #rospy.loginfo("Received point at time %d", data.header.stamp.to_sec())
+def twp_rebro(data):
     if tare_mode:
         tare_wp = data
         pub_wp.publish(tare_wp)
+
+def fwp_rebro(data):
+    if far_mode:
+        far_wp = data
+        pub_wp.publish(far_wp)
 
 def tare_switch(tog):
     global tare_mode
     tare_mode = tog.data
 
-def goal_cb(msg):
-    global tare_mode
-    if get_sq_dist(msg.point, current_point) < 10**2:
-        tare_mode = True
-    else:
+def tsp_callback(tsp_msg, unreach_msg):
+    global tare_mode, far_mode
+    if tsp_msg.point == unreach_msg.point:
+        far_mode = True
         tare_mode = False
-        msg.header.stamp = rospy.Time.now()
-        pub_gp.publish(msg)
 
 def reach_status_cb(msg):
     if msg.data:
@@ -74,16 +75,16 @@ if __name__ == '__main__':
             cv2.destroyWindow('waiting...')
             poi = PointStamped(header=Header(stamp=rospy.Time.now(),frame_id='test'), point=(Point(0,0,0)))
             pub_poi.publish(poi)
-            noe = NodeAndEdge(node_ind=0,keypose_id=0)
-            pub_keypose.publish(noe)
             pub_start.publish(Bool(True))
             break
 
-    rospy.Subscriber("/tare_way_point", PointStamped, wp_rebro)
+    rospy.Subscriber("/tare_way_point", PointStamped, twp_rebro)
+    rospy.Subscriber("/far_way_point", PointStamped, fwp_rebro)
     rospy.Subscriber("/pose_stamp", PoseStamped, save_pose)
-    rospy.Subscriber("/far_way_point", PointStamped, wp_rebro)
-    #rospy.Subscriber("/sensor_coverage_planner/tare_planner_node/goal_point", PointStamped, goal_cb)
-    #rospy.Subscriber('/far_reach_goal_status', Bool, reach_status_cb)
+    tsp_sub = message_filters.Subscriber("/sensor_coverage_planner/tare_planner_node/tsp_next", PointStamped)
+    unreach_sub = message_filters.Subscriber('/sensor_coverage_planner/tare_planner_node/unreachable', PointStamped)
+    ts = message_filters.TimeSynchronizer([tsp_sub, unreach_sub], 10)
+    #ts.registerCallback(tsp_callback)
     rospy.Subscriber('/toggle_wp', Bool, tare_switch) 
     rospy.Subscriber('/del_model_in', String, del_model)
     rospy.spin()
